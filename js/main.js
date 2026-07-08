@@ -83,6 +83,30 @@
     });
   }
 
+  /* ---- Atmospheric field parallax drift ---- */
+  const bloom = document.querySelector('.field__bloom');
+  const ember = document.querySelector('.field__ember');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if ((bloom || ember) && !reduceMotion) {
+    let ticking = false;
+    const drift = () => {
+      const y = window.scrollY;
+      if (bloom) bloom.style.transform = `translateY(${y * 0.03}px)`;
+      if (ember) ember.style.transform = `translate(-50%, calc(-50% + ${y * -0.05}px))`;
+      ticking = false;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(drift);
+        }
+      },
+      { passive: true }
+    );
+  }
+
   /* ---- Update footer year ---- */
   const yearEl = document.querySelector('[data-year]');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

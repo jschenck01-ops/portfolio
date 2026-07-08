@@ -33,6 +33,7 @@
   background-size: cover;
   background-position: center;
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-warm);
 }
 
 .case__section { padding-block: clamp(48px, 7vw, 96px); }
@@ -51,6 +52,7 @@
   background-size: cover;
   background-position: center;
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-warm);
 }
 .case__twoup {
   display: grid;
@@ -63,6 +65,7 @@
   background-size: cover;
   background-position: center;
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-warm);
 }
 
 .case__next { padding-block: clamp(70px, 10vw, 140px); border-top: 1px solid var(--line); }
