@@ -49,50 +49,52 @@
     reveals.forEach((el) => el.classList.add('is-visible'));
   }
 
-  /* ---- Floating project preview (desktop) ---- */
-  const preview = document.getElementById('projectPreview');
-  const projects = document.querySelectorAll('.project');
-  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-  if (preview && canHover) {
-    let raf = null;
-    let mouseX = 0;
-    let mouseY = 0;
-
-    const move = () => {
-      preview.style.left = mouseX + 'px';
-      preview.style.top = mouseY + 'px';
-      raf = null;
-    };
-
-    projects.forEach((project) => {
-      const img = project.getAttribute('data-img');
-      project.addEventListener('mouseenter', () => {
-        if (img) preview.style.backgroundImage = `url('${img}')`;
-        preview.classList.add('is-active');
-      });
-      project.addEventListener('mouseleave', () => {
-        preview.classList.remove('is-active');
+  /* ---- Operational Ledger masonry ---- */
+  const grids = document.querySelectorAll('.ledger__grid');
+  const layoutMasonry = () => {
+    grids.forEach((grid) => {
+      const styles = getComputedStyle(grid);
+      const rowH = parseFloat(styles.gridAutoRows) || 6;
+      const gap = parseFloat(styles.rowGap) || 0;
+      const single = grid.style.gridTemplateColumns === '1fr' ||
+        styles.gridTemplateColumns.split(' ').length < 2;
+      grid.querySelectorAll('.card').forEach((card) => {
+        card.style.gridRowEnd = '';
+        const h = card.getBoundingClientRect().height;
+        const span = Math.ceil((h + gap) / (rowH + gap));
+        card.style.gridRowEnd = 'span ' + span;
       });
     });
-
-    document.querySelector('.work').addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      if (!raf) raf = requestAnimationFrame(move);
+  };
+  if (grids.length) {
+    layoutMasonry();
+    // re-run after fonts settle and images (if any) load
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutMasonry);
+    window.addEventListener('load', layoutMasonry);
+    let rz;
+    window.addEventListener('resize', () => {
+      clearTimeout(rz);
+      rz = setTimeout(layoutMasonry, 120);
+    });
+    document.querySelectorAll('.ledger .media').forEach((m) => {
+      const bg = m.style.backgroundImage;
+      const url = bg && bg.match(/url\(['"]?([^'")]+)['"]?\)/);
+      if (url) {
+        const im = new Image();
+        im.onload = layoutMasonry;
+        im.src = url[1];
+      }
     });
   }
 
   /* ---- Atmospheric field parallax drift ---- */
-  const bloom = document.querySelector('.field__bloom');
-  const ember = document.querySelector('.field__ember');
+  const fieldLayers = document.querySelector('.field__layers');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if ((bloom || ember) && !reduceMotion) {
+  if (fieldLayers && !reduceMotion) {
     let ticking = false;
     const drift = () => {
-      const y = window.scrollY;
-      if (bloom) bloom.style.transform = `translateY(${y * 0.03}px)`;
-      if (ember) ember.style.transform = `translate(-50%, calc(-50% + ${y * -0.05}px))`;
+      // drift the whole field a few px against the content
+      fieldLayers.style.transform = `translateY(${window.scrollY * 0.04}px)`;
       ticking = false;
     };
     window.addEventListener(
