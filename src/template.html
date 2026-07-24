@@ -375,9 +375,13 @@ footer.foot .mono{font-family:var(--mono); font-size:12px;}
 </div>
 
 <!-- ==========================================================
-     GSAP (vendored locally, minified — no runtime network)
+     GSAP + plugins (vendored locally, minified — no runtime network).
+     As of GSAP 3.13 every plugin is free; DrawSVG draws the leader
+     lines, SplitText reveals the title.
      ========================================================== -->
 <script>/*__GSAP_MIN__*/</script>
+<script>/*__DRAWSVG__*/</script>
+<script>/*__SPLITTEXT__*/</script>
 
 <!-- ==========================================================
      CONTENT — data for THIS activity (swap this to reskin the

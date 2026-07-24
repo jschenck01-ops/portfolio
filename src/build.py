@@ -17,17 +17,21 @@ ROOT = SRC.parent
 
 template = (SRC / "template.html").read_text()
 gsap     = (ROOT / "node_modules/gsap/dist/gsap.min.js").read_text()
+drawsvg  = (ROOT / "node_modules/gsap/dist/DrawSVGPlugin.min.js").read_text()
+splittxt = (ROOT / "node_modules/gsap/dist/SplitText.min.js").read_text()
 diagram  = (SRC / "diagram.svg").read_text().strip()
 engine   = (SRC / "engine.js").read_text()
 fonts    = json.loads((SRC / "fonts_b64.json").read_text())
 
 # --- guard: injected JS blobs must not break out of their <script> ---
-for name, blob in [("gsap", gsap), ("engine", engine)]:
+for name, blob in [("gsap", gsap), ("drawsvg", drawsvg), ("splittext", splittxt), ("engine", engine)]:
     if "</script>" in blob.lower():
         sys.exit(f"ERROR: {name} contains </script>")
 
 out = template
 out = out.replace("/*__GSAP_MIN__*/", gsap)
+out = out.replace("/*__DRAWSVG__*/", drawsvg)
+out = out.replace("/*__SPLITTEXT__*/", splittxt)
 out = out.replace("`__DIAGRAM_SVG__`", "`" + diagram + "`")
 out = out.replace("/* __ENGINE__ */", engine)
 
@@ -43,7 +47,7 @@ for token, key in font_map.items():
         sys.exit(f"ERROR: missing font {key}")
     out = out.replace(token, fonts[key])
 
-remaining = re.findall(r"__(?:GSAP_MIN|DIAGRAM_SVG|ENGINE|F_[A-Z0-9_]+)__", out)
+remaining = re.findall(r"__(?:GSAP_MIN|DRAWSVG|SPLITTEXT|DIAGRAM_SVG|ENGINE|F_[A-Z0-9_]+)__", out)
 if remaining:
     sys.exit(f"ERROR: tokens remain: {set(remaining)}")
 

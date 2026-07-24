@@ -620,30 +620,48 @@
 
   function setupMotion() {
     if (!window.gsap) return;
+    if (window.DrawSVGPlugin) gsap.registerPlugin(DrawSVGPlugin);
+    if (window.SplitText) gsap.registerPlugin(SplitText);
+
     gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
       allowMotion = true;
+      let titleSplit = null;
 
-      // leader lines draw in via stroke-dashoffset (DrawSVG-style, core GSAP)
+      // leader lines draw in (DrawSVG) — the diagram's signature moment
       const leaders = stage.querySelectorAll(".leader");
-      leaders.forEach((ln) => {
-        const len = ln.getTotalLength();
-        ln.style.strokeDasharray = len;
-        ln.style.strokeDashoffset = len;
-      });
       const anchors = stage.querySelectorAll(".anchors circle");
+      if (window.DrawSVGPlugin) gsap.set(leaders, { drawSVG: "0%" });
       gsap.set(anchors, { scale: 0, transformOrigin: "50% 50%" });
 
       const tl = gsap.timeline();
-      tl.to(leaders, { strokeDashoffset: 0, duration: 0.7, stagger: 0.05, ease: "power1.inOut" })
-        .to(anchors, { scale: 1, duration: 0.3, stagger: 0.04, ease: "back.out(2)" }, "-=0.5")
+      if (window.DrawSVGPlugin) {
+        tl.to(leaders, { drawSVG: "100%", duration: 0.7, stagger: 0.05, ease: "power1.inOut" });
+      }
+      tl.to(anchors, { scale: 1, duration: 0.3, stagger: 0.04, ease: "back.out(2)" }, "-=0.5")
         .from(bankEl.querySelectorAll(".term"), {
           y: 12, opacity: 0, duration: 0.4, stagger: 0.04, ease: "power2.out"
         }, "-=0.3")
-        .from(slotButtons(), {
+        .from(stage.querySelectorAll(".slot"), {
           opacity: 0, duration: 0.35, stagger: 0.03, ease: "power1.out"
         }, "-=0.4");
 
-      return () => { allowMotion = false; }; // reduced-motion cleanup
+      // hero title: gentle character reveal once the display font is ready.
+      // Gated on fonts.ready so line/char metrics are correct; SplitText 3.13
+      // restores the accessible name automatically.
+      if (window.SplitText && document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          if (!allowMotion) return;
+          titleSplit = SplitText.create("#title", { type: "chars" });
+          gsap.from(titleSplit.chars, {
+            yPercent: 45, opacity: 0, duration: 0.55, ease: "power3.out", stagger: 0.03
+          });
+        });
+      }
+
+      return () => {                       // reduced-motion cleanup
+        allowMotion = false;
+        if (titleSplit) titleSplit.revert();
+      };
     });
   }
 

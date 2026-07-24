@@ -14,9 +14,12 @@ browser storage. Open it and go.
   Source Sans 3 (body), IBM Plex Mono (eyebrow, numerals, caption) — all
   self-hosted as inlined base64. Signal-teal primary with a sparing amber
   accent.
-- Motion: GSAP (vendored, core only). Leader lines draw in on load via
-  stroke-dashoffset; the term bank staggers up; the summary gauge draws and
-  counts up. All motion is reduced-motion safe.
+- Motion: GSAP 3.15 with DrawSVG and SplitText (all vendored and inlined —
+  every GSAP plugin is free as of 3.13). The leader lines draw in on load
+  (DrawSVG), the title character-reveals (SplitText), the term bank staggers
+  up, and the summary gauge draws and counts up. All motion is reduced-motion
+  safe: initial states are set only inside `gsap.matchMedia`, so with reduced
+  motion — or no JS — everything is visible and usable with zero animation.
 
 ## It's a reusable engine, not a one-off
 
