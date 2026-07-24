@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Workplace Scenarios · Scenario-Based Decision Making</title>
+<meta name="description" content="An accessible, scenario-based decision-making activity for laboratory professionals.">
+
+<!--FONTS-->
+
+<style>
+  /* ============================================================================
+     PROFESSIONAL WORKPLACE SCENARIOS
+     Art direction: precision instrument / clinical control panel.
+     Palette is signal-based: teal = the live reading, amber = human judgment.
+     ============================================================================ */
+
+  :root {
+    /* ---- Ground & surface ---- */
+    --ink:        #0B1A26;  /* deepest ground */
+    --navy:       #0F2537;  /* hero + summary ground */
+    --navy-2:     #133048;  /* raised panel on navy */
+    --paper:      #F2F6F7;  /* page */
+    --panel:      #FFFFFF;  /* instrument card */
+
+    /* ---- Signal accents ---- */
+    --teal:       #0FB5A6;  /* the live "reading" color */
+    --teal-deep:  #0A8F86;  /* teal text on light */
+    --teal-ink:   #065A55;  /* strong teal text on light */
+    --amber:      #C9781A;  /* human-judgment domains only */
+    --amber-deep: #A5610F;  /* amber text on light */
+
+    /* ---- Lines & text ---- */
+    --line:        #D3DDE2;
+    --line-strong: #5B7383;
+    --text:        #0B1A26;  /* primary on light */
+    --text-muted:  #4A5E6B;  /* secondary on light (>= 4.5:1 on paper) */
+    --on-navy:     #EAF1F3;  /* primary on navy */
+    --on-navy-dim: #A9BFCB;  /* secondary on navy (>= 4.5:1 on navy) */
+
+    /* ---- States ---- */
+    --correct:     #12703F;  --correct-bg: #E6F3EC;  --correct-line:#A6D8BC;
+    --wrong:       #A3182A;  --wrong-bg:   #FBE9EB;   --wrong-line: #EBB9BF;
+    --focus:       #B8420F;  /* kept distinct from teal so focus never hides in brand */
+
+    /* ---- 8px spacing scale ---- */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+    --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+    --radius:  14px;
+    --radius-s: 10px;
+    --measure: 66ch;
+
+    --ff-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --ff-body:    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ff-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--ff-body);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Root fills viewport so cover/summary dark grounds bleed edge to edge. */
+  .stage {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  .stage.on-dark { background: var(--navy); color: var(--on-navy); }
+
+  /* ---- Utility ---- */
+  .mono {
+    font-family: var(--ff-mono);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    font-feature-settings: "tnum" 1;
+  }
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: var(--s3); top: -56px;
+    background: var(--teal-ink); color: #fff;
+    padding: var(--s3) var(--s4); border-radius: var(--radius-s);
+    z-index: 20; font-weight: 600; text-decoration: none;
+    transition: top .15s ease;
+  }
+  .skip-link:focus { top: var(--s3); }
+
+  /* ---- Focus: visible, high-contrast, everywhere ---- */
+  a:focus-visible, button:focus-visible,
+  input[type="radio"]:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Fallback for engines without :focus-visible */
+  a:focus, button:focus, input[type="radio"]:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  /* ============================================================================
+     TOP INSTRUMENT BAR — segmented stepper + mono counters (scenario screens)
+     ============================================================================ */
+  .instrument-bar {
+    max-width: 940px;
+    margin: 0 auto;
+    width: 100%;
+    padding: var(--s5) var(--s5) 0;
+  }
+  .instrument-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s4);
+    margin-bottom: var(--s3);
+  }
+  .instrument-row .counter { color: var(--text-muted); font-size: 0.82rem; }
+  .instrument-row .counter b { color: var(--teal-ink); font-weight: 600; }
+  .instrument-row .tally { color: var(--text-muted); font-size: 0.82rem; }
+  .instrument-row .tally b { color: var(--text); font-weight: 600; }
+
+  .stepper { display: flex; gap: var(--s2); }
+  .stepper .seg {
+    height: 6px; flex: 1 1 0;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .stepper .seg .seg-fill {
+    position: absolute; inset: 0;
+    background: var(--teal);
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+  .stepper .seg.done .seg-fill { transform: scaleX(1); }
+  .stepper .seg.current { box-shadow: 0 0 0 2px rgba(15,181,166,.28); }
+
+  /* ============================================================================
+     MAIN + INSTRUMENT CARD
+     ============================================================================ */
+  main { display: block; flex: 1 1 auto; }
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    width: 100%;
+    padding: var(--s5);
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(11,26,38,.05), 0 12px 32px -18px rgba(11,26,38,.28);
+    padding: var(--s7);
+  }
+  @media (max-width: 620px) { .card { padding: var(--s5); } }
+
+  /* ---- Domain tag ---- */
+  .domain-tag {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    font-family: var(--ff-mono); font-weight: 500;
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid currentColor;
+  }
+  .domain-tag .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor;
+  }
+  .domain-clinical { color: var(--teal-ink); background: rgba(15,181,166,.09); }
+  .domain-human    { color: var(--amber-deep); background: rgba(201,120,26,.10); }
+
+  .scenario-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s4); flex-wrap: wrap; margin-bottom: var(--s5);
+  }
+  .scenario-head .count-lg {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--line-strong); font-size: 0.82rem; letter-spacing: 0.1em;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 600; }
+  .scenario-title {
+    font-family: var(--ff-body);
+    font-size: 1.5rem; line-height: 1.25; letter-spacing: -0.01em;
+    color: var(--text); margin-bottom: var(--s4);
+    max-width: var(--measure);
+    width: fit-content;               /* focus ring hugs the text, not full width */
+  }
+  .scenario-title:focus { outline: 3px solid var(--focus); outline-offset: 5px; }
+  .situation {
+    max-width: var(--measure); color: var(--text); margin: 0 0 var(--s6);
+    font-size: 1.05rem;
+  }
+
+  /* ---- Fieldset / radio options ---- */
+  fieldset.options { border: 0; margin: 0; padding: 0; min-width: 0; }
+  fieldset.options legend {
+    font-family: var(--ff-mono); font-weight: 500;
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: var(--s3); padding: 0;
+  }
+
+  .option {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: var(--s3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: var(--s4) var(--s4);
+    margin-bottom: var(--s3);
+    cursor: pointer;
+    background: var(--panel);
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { border-color: var(--line-strong); }
+  .option:focus-within { border-color: var(--teal-deep); box-shadow: 0 0 0 3px rgba(15,181,166,.14); }
+
+  .option input[type="radio"] {
+    grid-column: 1;
+    margin-top: 2px;
+    width: 20px; height: 20px; flex: none;
+    accent-color: var(--teal-deep);
+    cursor: pointer;
+  }
+  .option .opt-letter {
+    grid-column: 2;
+    font-family: var(--ff-mono); font-weight: 600;
+    color: var(--line-strong); font-size: 0.86rem;
+    margin-right: 2px;
+  }
+  .option .opt-text { grid-column: 2; color: var(--text); }
+  /* place letter + text on one flow line */
+  .option .opt-body { grid-column: 2; }
+  .option .opt-body .opt-letter { margin-right: var(--s2); }
+  .option .tag {
+    grid-column: 3;
+    align-self: center;
+    font-family: var(--ff-mono); font-weight: 600;
+    font-size: 0.72rem; letter-spacing: 0.04em;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .option .tag svg { width: 15px; height: 15px; display: block; }
+
+  .option.locked { cursor: default; }
+  .option.locked input[type="radio"] { cursor: default; }
+  .option.is-correct { border-color: var(--correct-line); background: var(--correct-bg); }
+  .option.is-correct .tag { color: var(--correct); }
+  .option.is-chosen-wrong { border-color: var(--wrong-line); background: var(--wrong-bg); }
+  .option.is-chosen-wrong .tag { color: var(--wrong); }
+
+  /* ---- Feedback ---- */
+  .feedback {
+    margin-top: var(--s5);
+    border-radius: var(--radius-s);
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    padding: var(--s4) var(--s5);
+    background: #F7FAFB;
+  }
+  .feedback[hidden] { display: none; }
+  .feedback.correct { border-color: var(--correct-line); border-left-color: var(--correct); background: var(--correct-bg); }
+  .feedback.incorrect { border-color: var(--wrong-line); border-left-color: var(--wrong); background: var(--wrong-bg); }
+  .feedback .result-line {
+    display: flex; align-items: center; gap: var(--s2);
+    margin: 0 0 var(--s2);
+    font-family: var(--ff-mono); font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.82rem;
+  }
+  .feedback.correct .result-line { color: var(--correct); }
+  .feedback.incorrect .result-line { color: var(--wrong); }
+  .feedback .result-line svg { width: 18px; height: 18px; }
+  .feedback .fb-body { margin: 0; color: var(--text); max-width: var(--measure); }
+  .feedback .fb-correct {
+    margin: var(--s3) 0 0; color: var(--text); font-size: 0.98rem;
+    max-width: var(--measure);
+  }
+  .feedback .fb-correct b { color: var(--correct); }
+
+  /* ---- Actions / buttons ---- */
+  .actions { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s6); }
+  .btn {
+    font-family: var(--ff-body); font-size: 1rem; font-weight: 600;
+    border-radius: var(--radius-s);
+    padding: 13px 24px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .05s ease;
+  }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn-primary { background: var(--teal-ink); color: #fff; border-color: var(--teal-ink); }
+  .btn-primary:hover:not(:disabled) { background: #054a46; border-color: #054a46; }
+  .btn-ghost { background: transparent; color: var(--teal-ink); border-color: var(--line-strong); }
+  .btn-ghost:hover:not(:disabled) { background: rgba(6,90,85,.06); }
+  .btn:disabled { opacity: .42; cursor: not-allowed; }
+
+  /* Buttons on dark ground */
+  .on-dark .btn-primary { background: var(--teal); color: var(--ink); border-color: var(--teal); }
+  .on-dark .btn-primary:hover:not(:disabled) { background: #3ac9bc; border-color: #3ac9bc; }
+  .on-dark .btn-ghost { color: var(--on-navy); border-color: var(--line-strong); }
+  .on-dark .btn-ghost:hover:not(:disabled) { background: rgba(234,241,243,.08); }
+
+  /* ============================================================================
+     COVER
+     ============================================================================ */
+  .cover-wrap {
+    max-width: 940px; margin: 0 auto; width: 100%;
+    padding: var(--s8) var(--s5);
+    flex: 1 1 auto;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .helix {
+    width: 100%; height: auto; max-width: 560px;
+    margin-bottom: var(--s6);
+    display: block;
+  }
+  .helix path, .helix line { stroke: var(--teal); fill: none; }
+  .cover-eyebrow {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--teal); font-size: 0.8rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin: 0 0 var(--s4);
+  }
+  .cover-title {
+    font-family: var(--ff-display);
+    font-weight: 600;
+    font-size: clamp(2.6rem, 6.2vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    color: var(--on-navy);
+    margin: 0 0 var(--s5);
+    max-width: 15ch;
+  }
+  .cover-lede {
+    max-width: 54ch; color: var(--on-navy-dim);
+    font-size: 1.12rem; line-height: 1.55; margin: 0 0 var(--s6);
+  }
+  .cover-chips { display: flex; flex-wrap: wrap; gap: var(--s3); margin: 0 0 var(--s7); }
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    font-family: var(--ff-mono); font-weight: 500;
+    font-size: 0.76rem; letter-spacing: 0.08em;
+    color: var(--on-navy); padding: 9px 14px;
+    border: 1px solid rgba(169,191,203,.32); border-radius: 999px;
+    background: rgba(234,241,243,.03);
+  }
+  .chip svg { width: 15px; height: 15px; color: var(--teal); }
+  .cover-actions { display: flex; gap: var(--s3); flex-wrap: wrap; }
+
+  /* ============================================================================
+     SUMMARY
+     ============================================================================ */
+  .summary-wrap {
+    max-width: 940px; margin: 0 auto; width: 100%;
+    padding: var(--s8) var(--s5); flex: 1 1 auto;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .summary-eyebrow {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--teal); font-size: 0.78rem;
+    letter-spacing: 0.22em; text-transform: uppercase; margin: 0 0 var(--s5);
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    gap: var(--s8);
+    align-items: center;
+  }
+  @media (max-width: 720px) {
+    .summary-grid { grid-template-columns: 1fr; gap: var(--s6); justify-items: start; }
+  }
+
+  /* Assay gauge */
+  .gauge { position: relative; width: 240px; height: 240px; }
+  .gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge .track { stroke: rgba(169,191,203,.22); fill: none; }
+  .gauge .arc { stroke: var(--teal); fill: none; stroke-linecap: round; }
+  .gauge .readout {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .gauge .score-num {
+    font-family: var(--ff-display); font-weight: 600;
+    font-size: 3.4rem; line-height: 1; color: var(--on-navy);
+    font-feature-settings: "tnum" 1;
+  }
+  .gauge .score-den {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--on-navy-dim); font-size: 0.9rem; letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+  .gauge .score-cap {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--teal); font-size: 0.66rem; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-top: var(--s3);
+  }
+
+  .summary-title {
+    font-family: var(--ff-display); font-weight: 600;
+    font-size: clamp(1.8rem, 3.4vw, 2.4rem); line-height: 1.1;
+    color: var(--on-navy); margin: 0 0 var(--s3); letter-spacing: -0.01em;
+    width: fit-content; max-width: 100%;
+  }
+  .summary-title:focus { outline: 3px solid var(--focus); outline-offset: 5px; }
+  .summary-encourage {
+    color: var(--on-navy-dim); max-width: 52ch; margin: 0 0 var(--s4);
+    font-size: 1.05rem;
+  }
+  .review-note {
+    border-left: 3px solid var(--teal);
+    background: rgba(15,181,166,.06);
+    padding: var(--s3) var(--s4);
+    border-radius: 0 var(--radius-s) var(--radius-s) 0;
+    color: var(--on-navy); max-width: 52ch; margin: 0 0 var(--s6);
+    font-size: 0.98rem;
+  }
+
+  .behaviors-block { margin-top: var(--s7); border-top: 1px solid rgba(169,191,203,.18); padding-top: var(--s6); }
+  .behaviors-title {
+    font-family: var(--ff-mono); font-weight: 500;
+    color: var(--on-navy-dim); font-size: 0.74rem;
+    letter-spacing: 0.16em; text-transform: uppercase; margin: 0 0 var(--s4);
+  }
+  ul.behaviors {
+    list-style: none; margin: 0 0 var(--s7); padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s3) var(--s6);
+  }
+  @media (max-width: 620px) { ul.behaviors { grid-template-columns: 1fr; } }
+  ul.behaviors li {
+    display: grid; grid-template-columns: auto 1fr;
+    gap: var(--s3); align-items: start;
+    color: var(--on-navy); line-height: 1.4;
+  }
+  ul.behaviors li svg { width: 18px; height: 18px; margin-top: 3px; color: var(--teal); flex: none; }
+
+  /* ============================================================================
+     REDUCED MOTION — kill all non-essential transition/animation.
+     JS also skips every GSAP timeline under this query.
+     ============================================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  @media (max-width: 620px) {
+    body { font-size: 16px; }
+    .actions { flex-direction: column; }
+    .actions .btn, .cover-actions .btn { width: 100%; }
+    .scenario-title { font-size: 1.32rem; }
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to activity</a>
+
+  <div class="stage on-dark" id="stage">
+    <!-- Polite live region for feedback + screen-change announcements -->
+    <div class="visually-hidden" aria-live="polite" id="live"></div>
+
+    <!-- Instrument bar (scenario screens only; hidden on cover/summary) -->
+    <header class="instrument-bar" id="bar" hidden>
+      <div class="instrument-row">
+        <span class="counter mono"><b id="count-cur">01</b> / 06</span>
+        <span class="tally mono">Score <b id="tally">0</b></span>
+      </div>
+      <div class="stepper" id="stepper"
+           role="progressbar" aria-label="Activity progress"
+           aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+        <span class="seg"><span class="seg-fill"></span></span>
+        <span class="seg"><span class="seg-fill"></span></span>
+        <span class="seg"><span class="seg-fill"></span></span>
+        <span class="seg"><span class="seg-fill"></span></span>
+        <span class="seg"><span class="seg-fill"></span></span>
+        <span class="seg"><span class="seg-fill"></span></span>
+      </div>
+    </header>
+
+    <main id="main"><!-- screens render here --></main>
+  </div>
+
+<!--GSAP-->
+
+<script>
+"use strict";
+/* ============================================================================
+   1. CONTENT DATA MODEL  (fully separate from rendering / motion)
+      Options are preserved in the authored order. Correct answers are spread
+      across letters on purpose: B, D, A, C, D, B. Do not re-sort options.
+   ============================================================================ */
+  var SCENARIOS = [
+    {
+      id: 1, domain: "Privacy & Ethics", kind: "clinical",
+      title: "Patient Confidentiality",
+      situation: "While eating lunch in the hospital cafeteria, another laboratory employee begins discussing an interesting patient's test results loudly enough for visitors nearby to hear.",
+      options: [
+        { id: "A", text: "Join the conversation because everyone works in healthcare." },
+        { id: "B", text: "Politely remind your coworker that patient information should not be discussed in public areas." },
+        { id: "C", text: "Ignore the conversation because it isn't your responsibility." },
+        { id: "D", text: "Record the conversation to show your supervisor later." }
+      ],
+      correctId: "B",
+      feedbackCorrect: "Protecting patient confidentiality is a professional and legal responsibility. Conversations involving patient information should occur only in appropriate private settings.",
+      feedbackIncorrect: "Healthcare professionals are responsible for protecting patient privacy regardless of where they are located."
+    },
+    {
+      id: 2, domain: "Patient Safety", kind: "clinical",
+      title: "Specimen Labeling",
+      situation: "A coworker asks you to label several blood specimens that they collected because they are running behind schedule.",
+      options: [
+        { id: "A", text: "Label the specimens to help them catch up." },
+        { id: "B", text: "Label only the specimens you recognize." },
+        { id: "C", text: "Label them now and document it later." },
+        { id: "D", text: "Explain that specimens should be labeled by the individual collecting them according to laboratory policy." }
+      ],
+      correctId: "D",
+      feedback: "Proper specimen identification is essential for patient safety. Following established labeling procedures helps prevent identification errors and protects patients."
+    },
+    {
+      id: 3, domain: "Communication", kind: "human",
+      title: "Professional Communication",
+      situation: "A nurse calls the laboratory frustrated about a delayed test result and begins speaking in an irritated tone.",
+      options: [
+        { id: "A", text: "Remain calm, listen professionally, explain the situation respectfully, and offer assistance." },
+        { id: "B", text: "Match their tone to explain why the delay occurred." },
+        { id: "C", text: "End the call immediately." },
+        { id: "D", text: "Tell them they should contact someone else." }
+      ],
+      correctId: "A",
+      feedback: "Professional communication helps resolve problems while maintaining positive working relationships with healthcare colleagues."
+    },
+    {
+      id: 4, domain: "Safety", kind: "clinical",
+      title: "Laboratory Safety",
+      situation: "You notice another employee working without appropriate personal protective equipment (PPE).",
+      options: [
+        { id: "A", text: "Ignore it since they're experienced." },
+        { id: "B", text: "Wait to see if someone else notices." },
+        { id: "C", text: "Politely remind them about PPE requirements or follow laboratory reporting procedures." },
+        { id: "D", text: "Take a picture and post it in the team chat." }
+      ],
+      correctId: "C",
+      feedback: "Everyone shares responsibility for maintaining a safe laboratory environment. Addressing safety concerns appropriately helps prevent injuries and protects patients and staff."
+    },
+    {
+      id: 5, domain: "Quality & Integrity", kind: "clinical",
+      title: "Quality and Integrity",
+      situation: "You accidentally discover that you entered the wrong value into the laboratory information system before results were released.",
+      options: [
+        { id: "A", text: "Correct it without telling anyone." },
+        { id: "B", text: "Delete the result." },
+        { id: "C", text: "Wait to see if anyone notices." },
+        { id: "D", text: "Immediately follow laboratory procedures for reporting and correcting the error." }
+      ],
+      correctId: "D",
+      feedback: "Professional integrity means acknowledging mistakes promptly and following established quality assurance procedures."
+    },
+    {
+      id: 6, domain: "Teamwork", kind: "human",
+      title: "Teamwork",
+      situation: "The laboratory is especially busy and another department asks for assistance.",
+      options: [
+        { id: "A", text: "Tell them you're too busy without listening." },
+        { id: "B", text: "Communicate with your supervisor and assist if workload and priorities allow." },
+        { id: "C", text: "Help only if your supervisor is watching." },
+        { id: "D", text: "Ignore the request." }
+      ],
+      correctId: "B",
+      feedback: "Professional teamwork includes communicating effectively, balancing priorities, and supporting colleagues while maintaining patient care standards."
+    }
+  ];
+
+  var KEY_BEHAVIORS = [
+    "Protecting patient confidentiality",
+    "Following laboratory policies and procedures",
+    "Maintaining patient safety",
+    "Communicating respectfully",
+    "Demonstrating honesty and accountability",
+    "Supporting coworkers professionally",
+    "Following quality and safety standards"
+  ];
+
+  var TOTAL = SCENARIOS.length;
+
+/* ============================================================================
+   2. IN-MEMORY STATE  (no localStorage / sessionStorage / cookies)
+   ============================================================================ */
+  var state = {
+    score: 0,
+    answered:  new Array(TOTAL).fill(false),
+    chosen:    new Array(TOTAL).fill(null),
+    correct:   new Array(TOTAL).fill(false)
+  };
+
+/* ============================================================================
+   3. SCORM REPORTING SEAM  (build the seam; do NOT implement SCORM yet)
+      Every score / completion report routes through reportResult(). In this
+      standalone build it drives the on-screen summary. A SCORM 1.2 / 2004
+      adapter drops into the commented stub below without touching any
+      activity logic.
+   ============================================================================ */
+  function reportResult(scorePercent, passed, isComplete) {
+    /* --------------------------------------------------------------------
+       >>> SCORM ADAPTER HOOK (commented stub) <<<
+       An LMS wrapper initializes the API once at start-up and reports here.
+
+       // ---- SCORM 1.2 ----
+       // var api = getScormApi();                  // locate LMS API object
+       // api.LMSInitialize("");                     // once, at activity start
+       // api.LMSSetValue("cmi.core.score.raw", String(scorePercent));
+       // api.LMSSetValue("cmi.core.score.min", "0");
+       // api.LMSSetValue("cmi.core.score.max", "100");
+       // api.LMSSetValue("cmi.core.lesson_status",
+       //     isComplete ? (passed ? "passed" : "failed") : "incomplete");
+       // api.LMSCommit("");
+       // if (isComplete) api.LMSFinish("");
+
+       // ---- SCORM 2004 ----
+       // api.Initialize("");
+       // api.SetValue("cmi.score.raw",    String(scorePercent));
+       // api.SetValue("cmi.score.min",    "0");
+       // api.SetValue("cmi.score.max",    "100");
+       // api.SetValue("cmi.score.scaled", String(scorePercent / 100));
+       // api.SetValue("cmi.completion_status", isComplete ? "completed" : "incomplete");
+       // api.SetValue("cmi.success_status",    passed ? "passed" : "failed");
+       // api.Commit("");
+       // if (isComplete) api.Terminate("");
+
+       No activity code changes to enable the above — only this stub.
+       -------------------------------------------------------------------- */
+    if (isComplete) renderSummary(scorePercent, passed);
+  }
+
+/* ============================================================================
+   4. MOTION LAYER  (GSAP; fully reduced-motion + no-JS safe)
+      - Initial hidden states are set with gsap.set INSIDE matchMedia only,
+        so if motion is reduced or JS/GSAP fails, everything is visible.
+      - Motion is decorative; it never gates a control and never blocks
+        the aria-live announcements, which fire regardless.
+   ============================================================================ */
+  var HAS_GSAP = (typeof window.gsap !== "undefined");
+  var mm = null;
+
+  if (HAS_GSAP) {
+    try {
+      gsap.registerPlugin(window.DrawSVGPlugin, window.SplitText);
+    } catch (e) { /* plugin missing -> graceful, no motion */ }
+  }
+
+  // Run an orchestrated timeline for a screen, but only when motion is allowed.
+  function motion(buildFn) {
+    if (!HAS_GSAP) return;
+    if (mm) { mm.revert(); mm = null; }          // clean up previous screen
+    mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", buildFn);
+  }
+
+/* ============================================================================
+   5. DOM HELPERS
+   ============================================================================ */
+  var mainEl = document.getElementById("main");
+  var liveEl = document.getElementById("live");
+  var barEl  = document.getElementById("bar");
+  var stepperEl = document.getElementById("stepper");
+  var stageEl = document.getElementById("stage");
+
+  function announce(msg) {
+    liveEl.textContent = "";
+    window.requestAnimationFrame(function () { liveEl.textContent = msg; });
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // Inline icons (decorative unless noted); marked aria-hidden at call sites.
+  var ICON_CHECK = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICON_X = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  var ICON_CLOCK = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 6v4.2l2.8 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  var ICON_FLASK = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M8 2.5h4M8.6 2.5v5L4.7 14a2 2 0 001.8 3h7a2 2 0 001.8-3l-3.9-6.5v-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.2 12.5h7.6" stroke="currentColor" stroke-width="1.5"/></svg>';
+  var ICON_A11Y = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><circle cx="10" cy="3.6" r="1.6" fill="currentColor"/><path d="M3.5 6.5c2 .9 4.2 1.3 6.5 1.3s4.5-.4 6.5-1.3M10 7.8V13m0 0l-2.6 4.4M10 13l2.6 4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+
+  function updateBar(currentIndex, completedCount) {
+    document.getElementById("count-cur").textContent =
+      String(currentIndex + 1).padStart(2, "0");
+    document.getElementById("tally").textContent = String(state.score);
+    var segs = stepperEl.querySelectorAll(".seg");
+    for (var i = 0; i < segs.length; i++) {
+      segs[i].classList.toggle("done", i < completedCount);
+      segs[i].classList.toggle("current", i === currentIndex);
+    }
+    stepperEl.setAttribute("aria-valuenow", String(completedCount));
+    stepperEl.setAttribute("aria-valuetext",
+      "Scenario " + (currentIndex + 1) + " of " + TOTAL + ", " +
+      state.score + " correct so far");
+  }
+
+/* ============================================================================
+   6. COVER
+   ============================================================================ */
+  function renderCover() {
+    stageEl.classList.add("on-dark");
+    barEl.hidden = true;
+
+    mainEl.innerHTML =
+      '<section class="cover-wrap" aria-labelledby="cover-title">' +
+        '<svg class="helix" viewBox="0 0 560 120" aria-hidden="true" focusable="false">' +
+          window.__HELIX__ +
+        '</svg>' +
+        '<p class="cover-eyebrow mono" data-anim="eyebrow">Scenario-Based Decision Making</p>' +
+        '<h1 class="cover-title" id="cover-title">Professional Workplace Scenarios</h1>' +
+        '<p class="cover-lede" data-anim="lede">Step into six realistic laboratory situations and choose the most ' +
+          'professional response. Practice the judgment that keeps patients safe, work accurate, and a team trusted.</p>' +
+        '<div class="cover-chips">' +
+          '<span class="chip" data-anim="chip">' + ICON_FLASK + 'Scenario-based</span>' +
+          '<span class="chip" data-anim="chip">' + ICON_CLOCK + '10–15 minutes</span>' +
+          '<span class="chip" data-anim="chip">' + ICON_A11Y + 'Screen-reader accessible</span>' +
+        '</div>' +
+        '<div class="cover-actions">' +
+          '<button type="button" class="btn btn-primary" id="begin-btn" data-anim="begin">Begin activity</button>' +
+        '</div>' +
+      '</section>';
+
+    document.getElementById("begin-btn").addEventListener("click", function () {
+      renderScenario(0, true);
+    });
+
+    // Motion: helix draws, then title (SplitText) + copy stagger. Gate on fonts.
+    motion(function () {
+      var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      gsap.set(".helix path, .helix line", { drawSVG: "0%" });
+      gsap.set('[data-anim="eyebrow"], [data-anim="lede"], [data-anim="chip"], [data-anim="begin"]',
+        { opacity: 0, y: 18 });
+
+      tl.to(".helix path", { drawSVG: "100%", duration: 1.1, stagger: 0.12 })
+        .to(".helix line", { drawSVG: "100%", duration: 0.5, stagger: 0.03 }, "-=0.7")
+        .to('[data-anim="eyebrow"]', { opacity: 1, y: 0, duration: 0.5 }, "-=0.4");
+
+      // Title line reveal via SplitText (fonts must be ready first).
+      var doTitle = function () {
+        var split = new SplitText("#cover-title", { type: "lines", mask: "lines" });
+        gsap.set("#cover-title", { opacity: 1 });
+        tl.from(split.lines, { yPercent: 110, duration: 0.9, stagger: 0.12 }, "-=0.2");
+        tl.to('[data-anim="lede"]',  { opacity: 1, y: 0, duration: 0.55 }, "-=0.5");
+        tl.to('[data-anim="chip"]',  { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 }, "-=0.35");
+        tl.to('[data-anim="begin"]', { opacity: 1, y: 0, duration: 0.5 }, "-=0.25");
+      };
+      if (document.fonts && document.fonts.ready) {
+        gsap.set("#cover-title", { opacity: 0 });
+        document.fonts.ready.then(function () { doTitle(); });
+      } else { doTitle(); }
+    });
+  }
+
+/* ============================================================================
+   7. SCENARIO
+   ============================================================================ */
+  function renderScenario(index, animateEnter) {
+    stageEl.classList.remove("on-dark");
+    barEl.hidden = false;
+
+    var s = SCENARIOS[index];
+    var num = String(index + 1).padStart(2, "0");
+    updateBar(index, index); // completed = index (this one not yet answered)
+
+    var domainClass = s.kind === "human" ? "domain-human" : "domain-clinical";
+
+    var optionsHtml = s.options.map(function (opt) {
+      var inputId = "s" + s.id + "-" + opt.id;
+      return (
+        '<label class="option" id="wrap-' + inputId + '" for="' + inputId + '">' +
+          '<input type="radio" name="scenario-' + s.id + '" id="' + inputId + '" value="' + opt.id + '">' +
+          '<span class="opt-body"><span class="opt-letter" aria-hidden="true">' + opt.id + '</span>' +
+            '<span class="opt-text">' + esc(opt.text) + '</span></span>' +
+          '<span class="tag" id="tag-' + inputId + '" hidden></span>' +
+        '</label>'
+      );
+    }).join("");
+
+    mainEl.innerHTML =
+      '<div class="wrap" data-anim-card>' +
+        '<section class="card" aria-labelledby="sc-title">' +
+          '<div class="scenario-head">' +
+            '<span class="domain-tag ' + domainClass + '"><span class="dot" aria-hidden="true"></span>' +
+              esc(s.domain) + '</span>' +
+          '</div>' +
+          '<h2 class="scenario-title" id="sc-title" tabindex="-1">' + esc(s.title) + '</h2>' +
+          '<p class="situation">' + esc(s.situation) + '</p>' +
+          '<form id="sc-form">' +
+            '<fieldset class="options">' +
+              '<legend>Choose the most appropriate response</legend>' +
+              optionsHtml +
+            '</fieldset>' +
+            '<div class="feedback" id="feedback" role="group" aria-label="Feedback" hidden></div>' +
+            '<div class="actions">' +
+              '<button type="submit" class="btn btn-primary" id="submit-btn" disabled>Submit answer</button>' +
+              '<button type="button" class="btn btn-ghost" id="next-btn" disabled aria-disabled="true">' +
+                (index < TOTAL - 1 ? "Next scenario" : "See results") +
+              '</button>' +
+            '</div>' +
+          '</form>' +
+        '</section>' +
+      '</div>';
+
+    wireScenario(index);
+
+    var heading = document.getElementById("sc-title");
+    heading.focus();
+    announce("Scenario " + (index + 1) + " of " + TOTAL + ". " + s.domain + ". " + s.title + ".");
+
+    if (animateEnter !== false) {
+      motion(function () {
+        gsap.set('[data-anim-card] .card', { opacity: 0, y: 22 });
+        gsap.set('.option', { opacity: 0, y: 14 });
+        var tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+        tl.to('[data-anim-card] .card', { opacity: 1, y: 0, duration: 0.55 })
+          .to('.option', { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 }, "-=0.25");
+      });
+    }
+  }
+
+  function wireScenario(index) {
+    var form = document.getElementById("sc-form");
+    var submitBtn = document.getElementById("submit-btn");
+    var nextBtn = document.getElementById("next-btn");
+    var radios = Array.prototype.slice.call(form.querySelectorAll('input[type="radio"]'));
+
+    radios.forEach(function (r) {
+      r.addEventListener("change", function () {
+        if (!state.answered[index]) submitBtn.disabled = false;
+      });
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (state.answered[index]) return;
+      var sel = radios.filter(function (r) { return r.checked; })[0];
+      if (!sel) return;
+      submitAnswer(index, sel.value);
+    });
+
+    nextBtn.addEventListener("click", function () {
+      if (nextBtn.disabled) return;
+      if (index + 1 < TOTAL) renderScenario(index + 1, true);
+      else finish();
+    });
+  }
+
+  function submitAnswer(index, chosenId) {
+    var s = SCENARIOS[index];
+    var isCorrect = chosenId === s.correctId;
+
+    state.answered[index] = true;
+    state.chosen[index] = chosenId;
+    state.correct[index] = isCorrect;
+    if (isCorrect) state.score += 1;
+
+    var form = document.getElementById("sc-form");
+    var radios = Array.prototype.slice.call(form.querySelectorAll('input[type="radio"]'));
+
+    radios.forEach(function (r) {
+      r.disabled = true;
+      var label = document.getElementById("wrap-" + r.id);
+      var tag = document.getElementById("tag-" + r.id);
+      label.classList.add("locked");
+      if (r.value === s.correctId) {
+        label.classList.add("is-correct");
+        tag.hidden = false;
+        tag.innerHTML = ICON_CHECK + '<span>Correct answer</span>';
+      } else if (r.value === chosenId) {
+        label.classList.add("is-chosen-wrong");
+        tag.hidden = false;
+        tag.innerHTML = ICON_X + '<span>Your choice</span>';
+      }
+    });
+
+    var fbText = (index === 0)
+      ? (isCorrect ? s.feedbackCorrect : s.feedbackIncorrect)
+      : s.feedback;
+
+    var correctOpt = s.options.filter(function (o) { return o.id === s.correctId; })[0];
+
+    var fb = document.getElementById("feedback");
+    fb.classList.remove("correct", "incorrect");
+    fb.classList.add(isCorrect ? "correct" : "incorrect");
+    fb.innerHTML =
+      '<p class="result-line">' + (isCorrect ? ICON_CHECK : ICON_X) +
+        '<span>' + (isCorrect ? "Correct" : "Incorrect") + '</span></p>' +
+      '<p class="fb-body">' + esc(fbText) + '</p>' +
+      (isCorrect ? '' :
+        '<p class="fb-correct"><b>Correct response.</b> ' + esc(s.correctId) + '. ' +
+        esc(correctOpt.text) + '</p>');
+    fb.hidden = false;
+
+    document.getElementById("submit-btn").disabled = true;
+    var nextBtn = document.getElementById("next-btn");
+    nextBtn.disabled = false;
+    nextBtn.setAttribute("aria-disabled", "false");
+
+    updateBar(index, index + 1);
+
+    announce(
+      (isCorrect ? "Correct. " : "Incorrect. ") + fbText +
+      (isCorrect ? "" : " The correct response is " + s.correctId + ", " + correctOpt.text + ".") +
+      " Select Next to continue."
+    );
+
+    // Settle motion: correct + chosen options ease in, feedback opens. No overshoot.
+    motion(function () {
+      var targets = ['#wrap-s' + s.id + '-' + s.correctId];
+      if (!isCorrect) targets.push('#wrap-s' + s.id + '-' + chosenId);
+      gsap.fromTo(targets, { scale: 0.99 }, { scale: 1, duration: 0.3, ease: "power2.out", clearProps: "transform" });
+      gsap.from("#feedback", { opacity: 0, y: 10, duration: 0.4, ease: "power2.out" });
+    });
+
+    fb.setAttribute("tabindex", "-1");
+    fb.focus();
+  }
+
+/* ============================================================================
+   8. FINISH -> route through the single reporting seam
+   ============================================================================ */
+  function finish() {
+    var pct = Math.round((state.score / TOTAL) * 100);
+    var passed = pct >= 70;                      // low-stakes reporting threshold
+    reportResult(pct, passed, true);
+  }
+
+/* ============================================================================
+   9. SUMMARY  (assay gauge)
+   ============================================================================ */
+  function renderSummary(scorePercent, passed) {
+    stageEl.classList.add("on-dark");
+    barEl.hidden = true;
+    updateBar(TOTAL - 1, TOTAL);
+
+    var missed = TOTAL - state.score;
+    var R = 104;                                  // gauge radius (viewBox 240)
+    var C = 2 * Math.PI * R;
+    var frac = state.score / TOTAL;
+
+    var reviewHtml = (missed > 0)
+      ? '<p class="review-note">Revisit the feedback on the ' + missed +
+        ' scenario' + (missed === 1 ? '' : 's') + ' you missed. Reading the reasoning ' +
+        'is the fastest way to lock in these habits.</p>'
+      : '<p class="review-note">You chose the most appropriate response every time. ' +
+        'These are exactly the habits that build trust on a laboratory team.</p>';
+
+    var behaviorsHtml = KEY_BEHAVIORS.map(function (b) {
+      return '<li>' + ICON_CHECK + '<span>' + esc(b) + '</span></li>';
+    }).join("");
+
+    mainEl.innerHTML =
+      '<section class="summary-wrap" aria-labelledby="sum-title">' +
+        '<p class="summary-eyebrow mono">Knowledge Check</p>' +
+        '<div class="summary-grid">' +
+          '<div class="gauge" data-anim-gauge>' +
+            '<svg viewBox="0 0 240 240" role="img" aria-label="Score: ' + state.score + ' out of ' + TOTAL + '">' +
+              '<circle class="track" cx="120" cy="120" r="' + R + '" stroke-width="12"></circle>' +
+              '<circle class="arc" id="gauge-arc" cx="120" cy="120" r="' + R + '" stroke-width="12" ' +
+                'stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - frac)) + '"></circle>' +
+            '</svg>' +
+            '<div class="readout" aria-hidden="true">' +
+              '<span class="score-num" id="score-num">' + state.score + '</span>' +
+              '<span class="score-den">/ ' + TOTAL + ' correct</span>' +
+              '<span class="score-cap">Assay complete</span>' +
+            '</div>' +
+          '</div>' +
+          '<div>' +
+            '<h1 class="summary-title" id="sum-title" tabindex="-1">' +
+              (passed ? "Solid professional judgment." : "Good practice. Keep going.") + '</h1>' +
+            '<p class="summary-encourage">This was practice, not a graded exam. The goal is confident, ' +
+              'consistent decisions when real laboratory situations arrive.</p>' +
+            reviewHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="behaviors-block">' +
+          '<h2 class="behaviors-title">Professional laboratory practice includes</h2>' +
+          '<ul class="behaviors">' + behaviorsHtml + '</ul>' +
+          '<div class="cover-actions">' +
+            '<button type="button" class="btn btn-primary" id="restart-btn">Restart activity</button>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    document.getElementById("restart-btn").addEventListener("click", restart);
+
+    var heading = document.getElementById("sum-title");
+    heading.focus();
+    announce("Activity complete. Your score is " + state.score + " out of " + TOTAL + " correct. " +
+      (missed > 0 ? "Review the feedback on any missed scenarios." : "You answered every scenario correctly."));
+
+    // Motion: gauge arc draws while the number counts up, then behaviors stagger.
+    motion(function () {
+      var arc = document.getElementById("gauge-arc");
+      var numEl = document.getElementById("score-num");
+      gsap.set(".summary-title, .summary-encourage, .review-note", { opacity: 0, y: 16 });
+      gsap.set(".behaviors-title, ul.behaviors li, #restart-btn", { opacity: 0, y: 14 });
+
+      var counter = { v: 0 };
+      var tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+      tl.fromTo(arc, { drawSVG: "0%" }, { drawSVG: (frac * 100) + "%", duration: 1.2, ease: "power2.inOut" })
+        .to(counter, {
+          v: state.score, duration: 1.2, ease: "power2.inOut", snap: { v: 1 },
+          onUpdate: function () { numEl.textContent = Math.round(counter.v); }
+        }, "<")
+        .to(".summary-title",     { opacity: 1, y: 0, duration: 0.5 }, "-=0.5")
+        .to(".summary-encourage", { opacity: 1, y: 0, duration: 0.5 }, "-=0.35")
+        .to(".review-note",       { opacity: 1, y: 0, duration: 0.5 }, "-=0.35")
+        .to(".behaviors-title",   { opacity: 1, y: 0, duration: 0.45 }, "-=0.2")
+        .to("ul.behaviors li",    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 }, "-=0.15")
+        .to("#restart-btn",       { opacity: 1, y: 0, duration: 0.4 }, "-=0.1");
+    });
+  }
+
+  function restart() {
+    state.score = 0;
+    state.answered = new Array(TOTAL).fill(false);
+    state.chosen = new Array(TOTAL).fill(null);
+    state.correct = new Array(TOTAL).fill(false);
+    renderCover();
+  }
+
+/* ============================================================================
+   10. START
+   ============================================================================ */
+  renderCover();
+</script>
+</body>
+</html>
