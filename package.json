@@ -1,0 +1,23 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "Accessible drag-and-drop labeling activities (WCAG 2.1 AA). A data-driven engine; content is a swap.",
+  "scripts": {
+    "fonts": "python3 src/fetch_fonts.py",
+    "build": "python3 src/build.py",
+    "test": "node src/verify.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:41729/git/jschenck01-ops/portfolio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gsap": "^3.15.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

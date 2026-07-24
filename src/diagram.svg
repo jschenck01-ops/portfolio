@@ -1,0 +1,95 @@
+<svg class="diagram" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="barrelGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4FBFA"/>
+      <stop offset="0.5" stop-color="#EAF7F5"/>
+      <stop offset="1" stop-color="#DCEFEC"/>
+    </linearGradient>
+    <linearGradient id="fluid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FD8CE"/>
+      <stop offset="1" stop-color="#3FB9AC"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C4CED4"/>
+      <stop offset="0.5" stop-color="#8A99A2"/>
+      <stop offset="1" stop-color="#B4BFC5"/>
+    </linearGradient>
+    <linearGradient id="plastic" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF2F4"/>
+      <stop offset="1" stop-color="#CBDBDF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ================= LEADER LINES (draw in on load) ================= -->
+  <g class="leaders" fill="none" stroke="#AEBEC6" stroke-width="1.4">
+    <line class="leader" x1="40"  y1="310" x2="115" y2="150"/>
+    <line class="leader" x1="66"  y1="306" x2="150" y2="470"/>
+    <line class="leader" x1="205" y1="304" x2="272" y2="150"/>
+    <line class="leader" x1="336" y1="322" x2="362" y2="470"/>
+    <line class="leader" x1="510" y1="336" x2="498" y2="150"/>
+    <line class="leader" x1="640" y1="258" x2="658" y2="150"/>
+    <line class="leader" x1="723" y1="232" x2="815" y2="150"/>
+    <line class="leader" x1="576" y1="344" x2="560" y2="470"/>
+    <line class="leader" x1="838" y1="322" x2="762" y2="470"/>
+    <line class="leader" x1="927" y1="310" x2="930" y2="470"/>
+  </g>
+  <g class="anchors" fill="#0FB5A6">
+    <circle cx="40"  cy="310" r="4"/>
+    <circle cx="66"  cy="306" r="4"/>
+    <circle cx="205" cy="304" r="4"/>
+    <circle cx="336" cy="322" r="4"/>
+    <circle cx="510" cy="336" r="4"/>
+    <circle cx="640" cy="258" r="4"/>
+    <circle cx="723" cy="232" r="4"/>
+    <circle cx="576" cy="344" r="4"/>
+    <circle cx="838" cy="322" r="4"/>
+    <circle cx="927" cy="310" r="4"/>
+  </g>
+
+  <!-- ================= SYRINGE BODY ================= -->
+  <!-- needle shaft -->
+  <rect x="78" y="305" width="228" height="10" rx="2" fill="url(#steel)" stroke="#6C7A82" stroke-width="1"/>
+  <!-- needle tip + bevel -->
+  <path d="M78 305 L40 309 L45 313 L78 315 Z" fill="url(#steel)" stroke="#6C7A82" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M40 309 L66 306 L64 312 L45 313 Z" fill="#6C7A82" opacity="0.55"/>
+
+  <!-- hub (plastic cone joining needle to barrel) -->
+  <path d="M300 300 L372 278 L372 342 L300 320 Z" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.4" stroke-linejoin="round"/>
+  <rect x="360" y="284" width="16" height="52" rx="3" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.4"/>
+
+  <!-- barrel -->
+  <rect x="372" y="250" width="346" height="120" rx="12" fill="url(#barrelGlass)" stroke="#0A8F86" stroke-width="1.8"/>
+  <!-- fluid inside (needle-end portion) -->
+  <path d="M384 300 L560 300 L560 358 Q384 358 384 358 Z" fill="url(#fluid)" opacity="0.5"/>
+  <rect x="384" y="300" width="176" height="58" rx="6" fill="url(#fluid)" opacity="0.42"/>
+  <!-- barrel top highlight -->
+  <rect x="384" y="258" width="322" height="5" rx="2.5" fill="#ffffff" opacity="0.7"/>
+
+  <!-- measurement graduation ticks -->
+  <g stroke="#0A8F86" stroke-width="1.6">
+    <line x1="600" y1="258" x2="600" y2="278"/>
+    <line x1="620" y1="258" x2="620" y2="270"/>
+    <line x1="640" y1="258" x2="640" y2="278"/>
+    <line x1="660" y1="258" x2="660" y2="270"/>
+    <line x1="680" y1="258" x2="680" y2="278"/>
+    <line x1="700" y1="258" x2="700" y2="270"/>
+    <line x1="580" y1="258" x2="580" y2="270"/>
+  </g>
+
+  <!-- plunger seal (rubber stopper on plunger tip, inside barrel) -->
+  <rect x="556" y="254" width="34" height="112" rx="7" fill="#E4B483" stroke="#C9781A" stroke-width="1.6"/>
+  <line x1="556" y1="290" x2="590" y2="290" stroke="#C9781A" stroke-width="1.2" opacity="0.7"/>
+  <line x1="556" y1="330" x2="590" y2="330" stroke="#C9781A" stroke-width="1.2" opacity="0.7"/>
+
+  <!-- flange (finger grips) at the barrel top -->
+  <path d="M712 222 L742 222 L742 250 L712 250 Z" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M712 370 L742 370 L742 398 L712 398 Z" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="708" y="248" width="14" height="124" rx="3" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.4"/>
+
+  <!-- plunger rod -->
+  <rect x="722" y="302" width="196" height="16" rx="3" fill="url(#plastic)" stroke="#6C7A82" stroke-width="1.2"/>
+  <line x1="740" y1="310" x2="908" y2="310" stroke="#9AA7AF" stroke-width="1.2" opacity="0.8"/>
+
+  <!-- plunger disk (thumb rest) -->
+  <rect x="916" y="268" width="20" height="84" rx="8" fill="url(#plastic)" stroke="#0A8F86" stroke-width="1.6"/>
+</svg>
