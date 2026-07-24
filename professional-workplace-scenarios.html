@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Workplace Scenarios — Scenario-Based Decision Making</title>
+<style>
+  /* ============================================================
+     Design tokens — neutral grayscale base + one restrained accent.
+     Contrast targets: all text >= 4.5:1 on its background.
+     ============================================================ */
+  :root {
+    --bg:            #f4f5f7;   /* page background */
+    --surface:       #ffffff;   /* card background */
+    --border:        #c7ccd4;   /* borders / dividers */
+    --border-strong: #6b7280;   /* stronger borders */
+    --text:          #1f2430;   /* primary text (>= 12:1 on surface) */
+    --text-muted:    #4b5563;   /* secondary text (>= 7:1 on surface) */
+
+    --accent:        #1d5b8a;   /* restrained blue accent */
+    --accent-dark:   #16496e;   /* darker accent for hover/focus */
+
+    --correct:       #1a6b3f;   /* dark green — used with text + icon, never alone */
+    --correct-bg:    #e7f3ec;
+    --incorrect:     #a01b2b;   /* dark red  — used with text + icon, never alone */
+    --incorrect-bg:  #fbe9eb;
+
+    --focus:         #b8420f;   /* high-contrast focus ring, distinct from accent */
+
+    --radius: 8px;
+    --measure: 68ch;            /* comfortable reading measure */
+    --shadow: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 20px 64px;
+  }
+
+  /* ---- Header ---- */
+  header.site {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  header.site h1 {
+    font-size: 1.55rem;
+    line-height: 1.25;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  header.site .subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.98rem;
+  }
+
+  /* ---- Progress ---- */
+  .progress-block { margin: 20px 0 8px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .progress-label .score { font-weight: 600; color: var(--text); }
+  .progress-track {
+    height: 10px;
+    background: #e2e5ea;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width .35s ease;
+  }
+
+  /* ---- Card / scenario ---- */
+  main { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 28px 24px;
+    margin-top: 16px;
+  }
+
+  .scenario-kicker {
+    font-size: 0.85rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .scenario-title {
+    font-size: 1.3rem;
+    line-height: 1.3;
+    margin: 0 0 16px;
+    color: var(--text);
+  }
+  .scenario-title:focus-visible,
+  .scenario-title:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .situation {
+    max-width: var(--measure);
+    margin: 0 0 20px;
+    color: var(--text);
+  }
+
+  /* ---- Fieldset / radio group ---- */
+  fieldset.options {
+    border: 0;
+    margin: 0 0 8px;
+    padding: 0;
+    min-width: 0;
+  }
+  fieldset.options legend {
+    font-weight: 600;
+    padding: 0;
+    margin: 0 0 12px;
+    font-size: 1.02rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background: var(--surface);
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .option:hover { border-color: var(--border-strong); }
+
+  .option input[type="radio"] {
+    /* Keep native control for full a11y; size it up for touch/visibility */
+    margin: 3px 0 0;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .option .option-text { color: var(--text); }
+
+  /* Focus indicator travels with the native radio */
+  .option input[type="radio"]:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  /* Fallback for browsers without :focus-visible */
+  .option input[type="radio"]:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .option:focus-within { border-color: var(--accent); }
+
+  /* Post-submission option states — color PLUS text label + symbol */
+  .option.is-correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+  .option.is-chosen-wrong {
+    border-color: var(--incorrect);
+    background: var(--incorrect-bg);
+  }
+  .option .tag {
+    margin-left: auto;
+    align-self: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    padding-left: 12px;
+  }
+  .option.is-correct .tag { color: var(--correct); }
+  .option.is-chosen-wrong .tag { color: var(--incorrect); }
+
+  /* Disabled (locked) options remain readable */
+  .option.locked { cursor: default; }
+  .option.locked input[type="radio"] { cursor: default; }
+
+  /* ---- Feedback region ---- */
+  .feedback {
+    margin-top: 18px;
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    background: #f8f9fb;
+  }
+  .feedback[hidden] { display: none; }
+  .feedback .result-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+  }
+  .feedback.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .feedback.incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); }
+  .feedback.correct .result-line { color: var(--correct); }
+  .feedback.incorrect .result-line { color: var(--incorrect); }
+  .feedback .result-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+    font-weight: 900;
+  }
+  .feedback .feedback-body { margin: 0; color: var(--text); }
+  .feedback .correct-answer-note {
+    margin: 10px 0 0;
+    color: var(--text);
+    font-size: 0.96rem;
+  }
+
+  /* ---- Buttons ---- */
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border-radius: var(--radius);
+    padding: 12px 22px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  button:focus-visible,
+  button:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--accent-dark);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover:not(:disabled) { background: #eef1f5; }
+  button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  /* ---- Completion summary ---- */
+  .summary-score {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+    margin: 6px 0 4px;
+  }
+  .summary-encourage { color: var(--text); margin: 0 0 20px; max-width: var(--measure); }
+  .summary-list-title { font-size: 1.05rem; margin: 20px 0 8px; }
+  ul.behaviors {
+    margin: 0 0 8px;
+    padding-left: 1.3em;
+    max-width: var(--measure);
+  }
+  ul.behaviors li { margin-bottom: 6px; }
+
+  .missed-note {
+    background: #f8f9fb;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 20px 0;
+    max-width: var(--measure);
+  }
+  .missed-note p { margin: 0; }
+
+  /* ---- Utility ---- */
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0);
+    white-space: nowrap; border: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 8px;
+    top: -48px;
+    background: var(--accent-dark);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    z-index: 10;
+    transition: top .15s ease;
+  }
+  .skip-link:focus {
+    top: 8px;
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* ---- Reduced motion ---- */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ---- Small screens ---- */
+  @media (max-width: 560px) {
+    body { font-size: 16px; }
+    .wrap { padding: 16px 14px 48px; }
+    .card { padding: 20px 18px; }
+    header.site h1 { font-size: 1.35rem; }
+    .actions { flex-direction: column; }
+    .actions button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to activity</a>
+
+  <div class="wrap">
+    <header class="site">
+      <h1>Professional Workplace Scenarios</h1>
+      <p class="subtitle">Scenario-Based Decision Making &middot; Estimated time: 10&ndash;15 minutes</p>
+
+      <div class="progress-block" aria-hidden="false">
+        <div class="progress-label">
+          <span id="progress-text">Scenario 1 of 6</span>
+          <span class="score" id="score-text">Score: 0</span>
+        </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="Activity progress"
+          aria-valuemin="0"
+          aria-valuemax="6"
+          aria-valuenow="0"
+          id="progressbar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Polite live region: announces feedback and screen changes to AT -->
+    <div class="visually-hidden" aria-live="polite" id="live-region"></div>
+
+    <main id="main-content">
+      <!-- Rendered by JavaScript -->
+    </main>
+  </div>
+
+<script>
+"use strict";
+
+/* ============================================================================
+   1. DATA MODEL  — content is fully separated from rendering/UI logic.
+      Each scenario: id, title, situation, options[], correctId, and feedback.
+      Scenario 1 carries distinct correct/incorrect feedback; scenarios 2–6
+      carry a single explanatory feedback string (shown after submission).
+   ============================================================================ */
+  const SCENARIOS = [
+    {
+      id: 1,
+      title: "Patient Confidentiality",
+      situation: "While eating lunch in the hospital cafeteria, another laboratory employee begins discussing an interesting patient's test results loudly enough for visitors nearby to hear.",
+      options: [
+        { id: "A", text: "Join the conversation because everyone works in healthcare." },
+        { id: "B", text: "Politely remind your coworker that patient information should not be discussed in public areas." },
+        { id: "C", text: "Ignore the conversation because it isn't your responsibility." },
+        { id: "D", text: "Record the conversation to show your supervisor later." }
+      ],
+      correctId: "B",
+      feedbackCorrect: "Protecting patient confidentiality is a professional and legal responsibility. Conversations involving patient information should occur only in appropriate private settings.",
+      feedbackIncorrect: "Healthcare professionals are responsible for protecting patient privacy regardless of where they are located."
+    },
+    {
+      id: 2,
+      title: "Specimen Labeling",
+      situation: "A coworker asks you to label several blood specimens that they collected because they are running behind schedule.",
+      options: [
+        { id: "A", text: "Label the specimens to help them catch up." },
+        { id: "B", text: "Label only the specimens you recognize." },
+        { id: "C", text: "Explain that specimens should be labeled by the individual collecting them according to laboratory policy." },
+        { id: "D", text: "Label them now and document it later." }
+      ],
+      correctId: "C",
+      feedback: "Proper specimen identification is essential for patient safety. Following established labeling procedures helps prevent identification errors and protects patients."
+    },
+    {
+      id: 3,
+      title: "Professional Communication",
+      situation: "A nurse calls the laboratory frustrated about a delayed test result and begins speaking in an irritated tone.",
+      options: [
+        { id: "A", text: "Match their tone to explain why the delay occurred." },
+        { id: "B", text: "End the call immediately." },
+        { id: "C", text: "Remain calm, listen professionally, explain the situation respectfully, and offer assistance." },
+        { id: "D", text: "Tell them they should contact someone else." }
+      ],
+      correctId: "C",
+      feedback: "Professional communication helps resolve problems while maintaining positive working relationships with healthcare colleagues."
+    },
+    {
+      id: 4,
+      title: "Laboratory Safety",
+      situation: "You notice another employee working without appropriate personal protective equipment (PPE).",
+      options: [
+        { id: "A", text: "Ignore it since they're experienced." },
+        { id: "B", text: "Politely remind them about PPE requirements or follow laboratory reporting procedures." },
+        { id: "C", text: "Wait to see if someone else notices." },
+        { id: "D", text: "Take a picture and post it in the team chat." }
+      ],
+      correctId: "B",
+      feedback: "Everyone shares responsibility for maintaining a safe laboratory environment. Addressing safety concerns appropriately helps prevent injuries and protects patients and staff."
+    },
+    {
+      id: 5,
+      title: "Quality and Integrity",
+      situation: "You accidentally discover that you entered the wrong value into the laboratory information system before results were released.",
+      options: [
+        { id: "A", text: "Correct it without telling anyone." },
+        { id: "B", text: "Delete the result." },
+        { id: "C", text: "Immediately follow laboratory procedures for reporting and correcting the error." },
+        { id: "D", text: "Wait to see if anyone notices." }
+      ],
+      correctId: "C",
+      feedback: "Professional integrity means acknowledging mistakes promptly and following established quality assurance procedures."
+    },
+    {
+      id: 6,
+      title: "Teamwork",
+      situation: "The laboratory is especially busy and another department asks for assistance.",
+      options: [
+        { id: "A", text: "Tell them you're too busy without listening." },
+        { id: "B", text: "Help only if your supervisor is watching." },
+        { id: "C", text: "Communicate with your supervisor and assist if workload and priorities allow." },
+        { id: "D", text: "Ignore the request." }
+      ],
+      correctId: "C",
+      feedback: "Professional teamwork includes communicating effectively, balancing priorities, and supporting colleagues while maintaining patient care standards."
+    }
+  ];
+
+  const KEY_BEHAVIORS = [
+    "Protecting patient confidentiality",
+    "Following laboratory policies and procedures",
+    "Maintaining patient safety",
+    "Communicating respectfully",
+    "Demonstrating honesty and accountability",
+    "Supporting coworkers professionally",
+    "Following quality and safety standards"
+  ];
+
+  const TOTAL = SCENARIOS.length;
+
+/* ============================================================================
+   2. IN-MEMORY STATE  — no localStorage / sessionStorage / cookies.
+      All progress is held here and reset on Restart / page reload.
+   ============================================================================ */
+  const state = {
+    index: 0,                                   // current scenario index (0-based)
+    score: 0,                                    // running total (1 pt / correct 1st attempt)
+    answered: new Array(TOTAL).fill(false),      // whether each scenario was submitted
+    chosen: new Array(TOTAL).fill(null),         // the option id the learner picked
+    wasCorrect: new Array(TOTAL).fill(false)     // whether the learner's answer was correct
+  };
+
+/* ============================================================================
+   3. SCORM REPORTING SEAM  (build the seam; do NOT implement SCORM yet)
+      ------------------------------------------------------------------
+      ALL completion/score reporting is routed through reportResult().
+      In this standalone build it simply drives the on-screen summary.
+      A SCORM 1.2 / 2004 adapter can be dropped into the marked stub below
+      later WITHOUT touching any activity logic above or below.
+   ============================================================================ */
+
+  /**
+   * Single reporting entry point for the whole activity.
+   * @param {number}  scorePercent  0–100 integer score.
+   * @param {boolean} passed        Whether the learner met the pass threshold.
+   * @param {boolean} isComplete    Whether the activity is finished.
+   */
+  function reportResult(scorePercent, passed, isComplete) {
+
+    /* ----------------------------------------------------------------------
+       >>> SCORM ADAPTER HOOK — intentionally left as a commented stub. <<<
+       When wrapping this learning object for an LMS, a SCORM adapter would
+       be initialized once at start-up and called here. Example shape:
+
+       // --- SCORM 1.2 ---
+       // var scorm = getScormAPI();            // locate the LMS API object
+       // scorm.LMSInitialize("");              // once, at activity start
+       // scorm.LMSSetValue("cmi.core.score.raw",   String(scorePercent));
+       // scorm.LMSSetValue("cmi.core.score.min",   "0");
+       // scorm.LMSSetValue("cmi.core.score.max",   "100");
+       // scorm.LMSSetValue("cmi.core.lesson_status",
+       //     isComplete ? (passed ? "passed" : "failed") : "incomplete");
+       // scorm.LMSCommit("");
+       // if (isComplete) scorm.LMSFinish("");
+
+       // --- SCORM 2004 equivalent ---
+       // scorm.Initialize("");
+       // scorm.SetValue("cmi.score.raw",    String(scorePercent));
+       // scorm.SetValue("cmi.score.min",    "0");
+       // scorm.SetValue("cmi.score.max",    "100");
+       // scorm.SetValue("cmi.score.scaled", String(scorePercent / 100));
+       // scorm.SetValue("cmi.completion_status", isComplete ? "completed" : "incomplete");
+       // scorm.SetValue("cmi.success_status",    passed ? "passed" : "failed");
+       // scorm.Commit("");
+       // if (isComplete) scorm.Terminate("");
+
+       No activity code needs to change to enable the above — only this stub.
+       ---------------------------------------------------------------------- */
+
+    // Standalone behavior: drive the on-screen completion summary.
+    if (isComplete) {
+      renderSummary(scorePercent, passed);
+    }
+  }
+
+/* ============================================================================
+   4. DOM HELPERS & RENDERING
+   ============================================================================ */
+  const mainEl        = document.getElementById("main-content");
+  const liveRegion    = document.getElementById("live-region");
+  const progressText  = document.getElementById("progress-text");
+  const scoreText     = document.getElementById("score-text");
+  const progressFill  = document.getElementById("progress-fill");
+  const progressbar   = document.getElementById("progressbar");
+
+  function announce(message) {
+    // Clearing first improves re-announcement reliability across AT.
+    liveRegion.textContent = "";
+    // Set on next frame so the change is registered as an update.
+    window.requestAnimationFrame(function () {
+      liveRegion.textContent = message;
+    });
+  }
+
+  function updateProgress(completedCount, labelText) {
+    progressText.textContent = labelText;
+    scoreText.textContent = "Score: " + state.score;
+    const pct = (completedCount / TOTAL) * 100;
+    progressFill.style.width = pct + "%";
+    progressbar.setAttribute("aria-valuenow", String(completedCount));
+    progressbar.setAttribute("aria-valuetext",
+      labelText + ", " + state.score + " correct so far");
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  /* ---- Render a single scenario screen ---- */
+  function renderScenario(index) {
+    const s = SCENARIOS[index];
+    const num = index + 1;
+
+    updateProgress(index, "Scenario " + num + " of " + TOTAL);
+
+    const optionsHtml = s.options.map(function (opt) {
+      const inputId = "s" + s.id + "-opt-" + opt.id;
+      return (
+        '<label class="option" id="wrap-' + inputId + '" for="' + inputId + '">' +
+          '<input type="radio" name="scenario-' + s.id + '" id="' + inputId + '" value="' + opt.id + '">' +
+          '<span class="option-text">' + escapeHtml(opt.text) + '</span>' +
+          '<span class="tag" id="tag-' + inputId + '" hidden></span>' +
+        '</label>'
+      );
+    }).join("");
+
+    mainEl.innerHTML =
+      '<section class="card" aria-labelledby="scenario-heading">' +
+        '<p class="scenario-kicker">Scenario ' + num + ' of ' + TOTAL + '</p>' +
+        '<h2 class="scenario-title" id="scenario-heading" tabindex="-1">' +
+          escapeHtml(s.title) +
+        '</h2>' +
+        '<p class="situation">' + escapeHtml(s.situation) + '</p>' +
+        '<form id="scenario-form">' +
+          '<fieldset class="options">' +
+            '<legend>Choose the most appropriate response:</legend>' +
+            optionsHtml +
+          '</fieldset>' +
+          '<div class="feedback" id="feedback" role="group" aria-label="Feedback" hidden></div>' +
+          '<div class="actions">' +
+            '<button type="submit" class="btn-primary" id="submit-btn" disabled>' +
+              'Submit answer' +
+            '</button>' +
+            '<button type="button" class="btn-secondary" id="next-btn" disabled aria-disabled="true">' +
+              (num < TOTAL ? 'Next scenario' : 'See results') +
+            '</button>' +
+          '</div>' +
+        '</form>' +
+      '</section>';
+
+    wireScenario(index);
+
+    // Move focus to the new scenario heading so SR users are not lost.
+    const heading = document.getElementById("scenario-heading");
+    heading.focus();
+    announce("Scenario " + num + " of " + TOTAL + ": " + s.title);
+  }
+
+  /* ---- Wire up interaction for the current scenario ---- */
+  function wireScenario(index) {
+    const s = SCENARIOS[index];
+    const form      = document.getElementById("scenario-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const nextBtn   = document.getElementById("next-btn");
+    const radios    = Array.prototype.slice.call(
+                        form.querySelectorAll('input[type="radio"]'));
+
+    // Enable Submit once a choice is made.
+    radios.forEach(function (r) {
+      r.addEventListener("change", function () {
+        if (!state.answered[index]) {
+          submitBtn.disabled = false;
+        }
+      });
+    });
+
+    // Submit = lock choice, score first attempt, reveal feedback.
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (state.answered[index]) return;
+
+      const selected = radios.filter(function (r) { return r.checked; })[0];
+      if (!selected) return; // guard: nothing chosen
+
+      handleSubmission(index, selected.value);
+    });
+
+    nextBtn.addEventListener("click", function () {
+      if (nextBtn.disabled) return;
+      goNext(index);
+    });
+  }
+
+  /* ---- Process a submitted answer ---- */
+  function handleSubmission(index, chosenId) {
+    const s = SCENARIOS[index];
+    const isCorrect = chosenId === s.correctId;
+
+    // Update state (1 point per correct first-attempt selection).
+    state.answered[index]  = true;
+    state.chosen[index]    = chosenId;
+    state.wasCorrect[index] = isCorrect;
+    if (isCorrect) state.score += 1;
+
+    // Lock all radios and visually mark correct / chosen-wrong options.
+    const form   = document.getElementById("scenario-form");
+    const radios = Array.prototype.slice.call(
+                     form.querySelectorAll('input[type="radio"]'));
+
+    radios.forEach(function (r) {
+      r.disabled = true;
+      const label = document.getElementById("wrap-" + r.id);
+      const tag   = document.getElementById("tag-" + r.id);
+      label.classList.add("locked");
+
+      if (r.value === s.correctId) {
+        label.classList.add("is-correct");
+        tag.hidden = false;
+        // Symbol is decorative; the word "Correct answer" carries meaning.
+        tag.innerHTML = '<span aria-hidden="true">✔</span> Correct answer';
+      } else if (r.value === chosenId) {
+        label.classList.add("is-chosen-wrong");
+        tag.hidden = false;
+        tag.innerHTML = '<span aria-hidden="true">✗</span> Your choice';
+      }
+    });
+
+    // Determine feedback text.
+    let feedbackText;
+    if (index === 0) {
+      feedbackText = isCorrect ? s.feedbackCorrect : s.feedbackIncorrect;
+    } else {
+      feedbackText = s.feedback;
+    }
+
+    const correctOption = s.options.filter(function (o) {
+      return o.id === s.correctId;
+    })[0];
+
+    // Render feedback panel (color + text label + non-color symbol).
+    const fb = document.getElementById("feedback");
+    fb.classList.remove("correct", "incorrect");
+    fb.classList.add(isCorrect ? "correct" : "incorrect");
+    fb.innerHTML =
+      '<p class="result-line">' +
+        '<span class="result-icon" aria-hidden="true">' +
+          (isCorrect ? "✔" : "✗") +
+        '</span>' +
+        '<span>' + (isCorrect ? "Correct" : "Incorrect") + '</span>' +
+      '</p>' +
+      '<p class="feedback-body">' + escapeHtml(feedbackText) + '</p>' +
+      (isCorrect ? '' :
+        '<p class="correct-answer-note"><strong>Correct response:</strong> ' +
+        escapeHtml(correctOption.text) + '</p>');
+    fb.hidden = false;
+
+    // Update controls: disable Submit, enable Next.
+    const submitBtn = document.getElementById("submit-btn");
+    const nextBtn   = document.getElementById("next-btn");
+    submitBtn.disabled = true;
+    nextBtn.disabled = false;
+    nextBtn.setAttribute("aria-disabled", "false");
+
+    updateProgress(index + 1, "Scenario " + (index + 1) + " of " + TOTAL);
+
+    // Announce result + feedback (and correct response when wrong) to AT.
+    const spoken =
+      (isCorrect ? "Correct. " : "Incorrect. ") +
+      feedbackText +
+      (isCorrect ? "" : " The correct response is: " + correctOption.text) +
+      " Select Next to continue.";
+    announce(spoken);
+
+    // Low-stakes tone: keep focus on feedback so it is read; do not steal
+    // focus to Next (learner tabs there when ready). Move focus to feedback
+    // group for SR context without trapping.
+    fb.setAttribute("tabindex", "-1");
+    fb.focus();
+  }
+
+  /* ---- Advance to next scenario or completion ---- */
+  function goNext(index) {
+    if (index + 1 < TOTAL) {
+      renderScenario(index + 1);
+    } else {
+      finish();
+    }
+  }
+
+  /* ---- Finish: compute score and route through the SCORM seam ---- */
+  function finish() {
+    const scorePercent = Math.round((state.score / TOTAL) * 100);
+    const passed = scorePercent >= 70; // low-stakes threshold for reporting
+    // ALL completion/score reporting flows through this single function.
+    reportResult(scorePercent, passed, true);
+  }
+
+  /* ---- Completion summary screen ---- */
+  function renderSummary(scorePercent, passed) {
+    updateProgress(TOTAL, "Activity complete");
+
+    const missedCount = TOTAL - state.score;
+
+    const behaviorsHtml = KEY_BEHAVIORS.map(function (b) {
+      return '<li>' + escapeHtml(b) + '</li>';
+    }).join("");
+
+    const missedHtml = (missedCount > 0)
+      ? '<div class="missed-note"><p>You may want to revisit the feedback for ' +
+        'the ' + missedCount + ' scenario' + (missedCount === 1 ? '' : 's') +
+        ' you missed. Reviewing the reasoning is a great way to reinforce these ' +
+        'professional habits.</p></div>'
+      : '<div class="missed-note"><p>You selected the most appropriate response ' +
+        'on every scenario. Nicely done &mdash; these are exactly the habits that ' +
+        'build trust in a laboratory team.</p></div>';
+
+    mainEl.innerHTML =
+      '<section class="card" aria-labelledby="summary-heading">' +
+        '<p class="scenario-kicker">Knowledge Check</p>' +
+        '<h2 id="summary-heading" tabindex="-1">Completion Summary</h2>' +
+        '<p class="summary-score">' + state.score + ' / ' + TOTAL + ' Correct</p>' +
+        '<p class="summary-encourage">' +
+          'Thanks for working through these workplace scenarios. This activity is ' +
+          'practice, not a graded exam &mdash; the goal is to build confidence in ' +
+          'making professional decisions.' +
+        '</p>' +
+        missedHtml +
+        '<h3 class="summary-list-title">Professional laboratory practice includes:</h3>' +
+        '<ul class="behaviors">' + behaviorsHtml + '</ul>' +
+        '<div class="actions">' +
+          '<button type="button" class="btn-primary" id="restart-btn">' +
+            'Restart activity' +
+          '</button>' +
+        '</div>' +
+      '</section>';
+
+    const restartBtn = document.getElementById("restart-btn");
+    restartBtn.addEventListener("click", restart);
+
+    const heading = document.getElementById("summary-heading");
+    heading.focus();
+    announce(
+      "Activity complete. Your score is " + state.score + " out of " + TOTAL +
+      " correct. " +
+      (missedCount > 0
+        ? "Review the feedback on any missed scenarios."
+        : "You answered every scenario correctly.")
+    );
+  }
+
+  /* ---- Restart: reset in-memory state and return to scenario 1 ---- */
+  function restart() {
+    state.index = 0;
+    state.score = 0;
+    state.answered   = new Array(TOTAL).fill(false);
+    state.chosen     = new Array(TOTAL).fill(null);
+    state.wasCorrect = new Array(TOTAL).fill(false);
+    renderScenario(0);
+  }
+
+/* ============================================================================
+   5. START
+   ============================================================================ */
+  renderScenario(0);
+
+</script>
+</body>
+</html>
