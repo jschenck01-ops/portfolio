@@ -102,6 +102,10 @@ Confirmed on the built file:
 ### Automated smoke test
 
 ```bash
-npm i -D playwright
+npm i -D playwright axe-core
 node src/verify.mjs      # asserts: no errors, no network, all three paths, reduced-motion
+node src/a11y-scan.mjs   # axe-core WCAG 2.1 A/AA scan across 5 states — 0 violations
 ```
+
+Both the overlay (desktop) and the stacked-list reflow (≤ 760px / high zoom)
+are exercised; the activity is usable at 320px with no horizontal scroll.

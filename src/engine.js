@@ -98,6 +98,12 @@
     fill.className = "fill";
     btn.append(num, fill);
 
+    // spoken position phrase — hidden in the overlay layout, shown when the
+    // blanks reflow to a stacked list on narrow viewports / high zoom
+    const pos = document.createElement("div");
+    pos.className = "slot-pos";
+    pos.textContent = s.positionText;
+
     const word = document.createElement("div");
     word.className = "status-word";
     word.setAttribute("aria-hidden", "true");
@@ -112,7 +118,7 @@
     sel.id = "sel-" + s.id;
     selWrap.append(label, sel);
 
-    root.append(mark, btn, word, selWrap);
+    root.append(mark, pos, btn, word, selWrap);
     stage.appendChild(root);
     slotRefs[s.id] = { root, btn, fill, sel, mark, word, n };
 

@@ -28,6 +28,7 @@
 :root{
   --ink:#0B1A26; --lab-navy:#0F2537; --paper:#F2F6F7; --panel:#FFFFFF;
   --teal:#0FB5A6; --teal-deep:#0A8F86; --teal-ink:#065A55;
+  --teal-btn:#08776E; /* primary-button fill: white text clears 4.5:1 (5.42:1) */
   --amber:#C9781A;
   --line:#D3DDE2;
   --correct:#12703F; --correct-bg:#E6F3EC;
@@ -156,6 +157,9 @@ h1{
   box-shadow:0 0 0 3px rgba(184,66,15,.22);
 }
 
+/* spoken position phrase — shown only in the stacked (reflow) layout */
+.slot-pos{display:none;}
+
 /* per-slot select fallback */
 .slot-select-wrap{margin-top:5px;}
 .slot-select-wrap label{
@@ -235,7 +239,7 @@ h1{
   display:inline-flex; align-items:center; gap:9px;
 }
 .btn:active{transform:translateY(1px);}
-.btn-primary{background:var(--teal-deep); color:#fff; box-shadow:var(--shadow-sm);}
+.btn-primary{background:var(--teal-btn); color:#fff; box-shadow:var(--shadow-sm);}
 .btn-primary:hover{background:var(--teal-ink);}
 .btn-secondary{background:#fff; color:var(--lab-navy); border-color:var(--line);}
 .btn-secondary:hover{border-color:var(--teal-deep); color:var(--teal-ink);}
@@ -296,6 +300,39 @@ footer.foot{
   font-size:13px; color:#5a6a74; display:flex; flex-wrap:wrap; gap:6px 18px;
 }
 footer.foot .mono{font-family:var(--mono); font-size:12px;}
+
+/* ============================================================
+   REFLOW (WCAG 1.4.10) — below 760px (and at high zoom) the blanks
+   stop being an overlay and become a readable, stacked list. The
+   diagram becomes a decorative illustration; leader lines are hidden
+   because there is nothing to point at. Same DOM, same state, all
+   three input paths intact.
+   ============================================================ */
+@media (max-width:760px){
+  .stage{aspect-ratio:auto; height:auto;}
+  .stage svg.diagram{
+    position:static; width:100%; height:auto; display:block; margin-bottom:16px;
+  }
+  .stage .leaders, .stage .anchors{display:none;}   /* nothing to point at */
+
+  .slot{
+    position:relative !important; left:auto !important; top:auto !important;
+    transform:none !important; width:100% !important; margin:0 0 12px;
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; box-shadow:var(--shadow-sm);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .slot .slot-pos{
+    display:block; order:1; font-family:var(--sans); font-size:14px;
+    font-weight:600; color:var(--lab-navy); line-height:1.3;
+  }
+  .slot .slot-btn{order:2; width:100%;}
+  .slot .status-word{order:3;}
+  .slot .slot-select-wrap{order:4; margin-top:0;}
+  .slot .mark{top:10px; right:10px;}
+  /* keep the drop/grab highlight legible as full-width cards */
+  .stage.grabbing .slot-btn{box-shadow:0 0 0 2px rgba(201,120,26,.18);}
+}
 </style>
 </head>
 <body>
@@ -686,6 +723,12 @@ const CONTENT = {
     fill.className = "fill";
     btn.append(num, fill);
 
+    // spoken position phrase — hidden in the overlay layout, shown when the
+    // blanks reflow to a stacked list on narrow viewports / high zoom
+    const pos = document.createElement("div");
+    pos.className = "slot-pos";
+    pos.textContent = s.positionText;
+
     const word = document.createElement("div");
     word.className = "status-word";
     word.setAttribute("aria-hidden", "true");
@@ -700,7 +743,7 @@ const CONTENT = {
     sel.id = "sel-" + s.id;
     selWrap.append(label, sel);
 
-    root.append(mark, btn, word, selWrap);
+    root.append(mark, pos, btn, word, selWrap);
     stage.appendChild(root);
     slotRefs[s.id] = { root, btn, fill, sel, mark, word, n };
 

@@ -44,13 +44,23 @@ they stay in sync and any of them can complete the activity.
 | Focus management | After a placement, focus returns to that blank; after Try again / Reset, focus returns to the first available term. The summary receives focus so a screen reader reads the result. |
 | Meaningful names | Each blank's accessible name states its number, spoken position, and current contents, e.g. *"Blank 7, at the finger grips at the top of the barrel, contains Syringe Flange."* |
 | Diagram is decorative | The SVG syringe is `aria-hidden="true"` / `focusable="false"`. Meaning is carried entirely by the blanks' position text and labels, so the task is understandable without the picture. |
-| Contrast ≥ 4.5:1 | Ink `#0B1A26` and Lab Navy `#0F2537` on Paper/Panel; teal, correct, wrong, and focus tokens chosen to clear 4.5:1 for text and 3:1 for UI/graphics. |
+| Contrast ≥ 4.5:1 | Verified per-pair: body text 15–16:1, eyebrow/labels 5.6–8:1, correct/wrong state text 5.4–7.7:1, focus ring 5:1. The primary button fill is tuned to `#08776E` so white text clears 4.5:1 (**5.42:1**). |
+| Reflow (1.4.10) | Below **760px** (and at high zoom) the blanks stop being a diagram overlay and become a stacked list of cards — each showing its position text, current term, and select — while the diagram becomes a decorative illustration. Usable at **320px with no horizontal scroll**; same DOM, same state, all three input paths intact. |
 | Reduced motion | All motion is wrapped in `gsap.matchMedia("(prefers-reduced-motion: no-preference)")`. Initial hidden states are set **only** inside that block, so with reduced motion — or with no JavaScript at all — every term, blank, and control is visible and fully usable with zero animation. Motion never gates a control or an announcement. |
 | Landmarks & headings | `<header>`, `<main>`, `<footer>`; a single `<h1>`; logical heading order; a descriptive `<title>`. |
 | Skip link | A "Skip to the labeling activity" link is the first focusable element. |
 | No injected HTML | All content-derived text is written with `textContent` / DOM nodes — never `innerHTML` — so data cannot inject markup. |
 | No storage | No `localStorage`, `sessionStorage`, or cookies. State lives in memory and resets on reload. |
 | Offline / self-contained | One HTML file. GSAP and all three fonts are vendored and inlined; the diagram is inline SVG. **Zero network requests at runtime.** |
+
+## Automated pass
+
+An axe-core scan (`node src/a11y-scan.mjs`) covering the WCAG 2.0/2.1 A & AA
+rulesets across five states — empty, mid-placement, checked/summary,
+reduced-motion, and 320px reflow — reports **zero violations** (critical,
+serious, moderate, and minor) and **zero external network requests** at
+runtime. Automated tools cover ~a third of WCAG; the manual checks below and
+the interaction model above cover the rest.
 
 ## Screen-reader test notes
 
