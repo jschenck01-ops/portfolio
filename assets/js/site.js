@@ -156,4 +156,77 @@
       window.location.href = form.getAttribute('data-redirect') || 'https://www.linkedin.com/in/jschenck01/';
     });
   })();
+
+  /* ---- 8. SCROLL PROGRESS BAR ---------------------------------------- */
+  (function(){
+    if (REDUCED) return;
+    var bar = document.createElement('div');
+    bar.className = 'scroll-prog'; bar.setAttribute('aria-hidden','true');
+    document.body.appendChild(bar);
+    var ticking = false;
+    function update(){
+      var h = document.documentElement.scrollHeight - innerHeight;
+      var p = h > 0 ? Math.min(scrollY / h, 1) : 0;
+      bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      ticking = false;
+    }
+    addEventListener('scroll', function(){ if(!ticking){ requestAnimationFrame(update); ticking = true; } }, {passive:true});
+    update();
+  })();
+
+  /* ---- 9. HERO PARALLAX (mouse + scroll) ----------------------------- */
+  (function(){
+    if (REDUCED) return;
+    var photo = document.querySelector('.hero-photo');
+    var hero  = document.querySelector('.hero');
+    if(!photo || !hero) return;
+    var mx = 0, my = 0, sc = 0, raf = 0;
+    function apply(){
+      raf = 0;
+      photo.style.transform = 'translate3d(' + (mx * -16) + 'px,' + (sc * 0.08 + my * -12) + 'px,0) scale(1.06)';
+    }
+    function req(){ if(!raf) raf = requestAnimationFrame(apply); }
+    addEventListener('pointermove', function(e){
+      mx = (e.clientX / innerWidth - .5);
+      my = (e.clientY / innerHeight - .5);
+      req();
+    }, {passive:true});
+    addEventListener('scroll', function(){
+      if (scrollY < innerHeight){ sc = scrollY; req(); }
+    }, {passive:true});
+  })();
+
+  /* ---- 10. STAGGERED LOGO REVEAL ------------------------------------- */
+  (function(){
+    var chips = document.querySelectorAll('.logo-chip');
+    if(!chips.length) return;
+    if (REDUCED){ chips.forEach(function(c){ c.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var idx = [].indexOf.call(chips, e.target);
+        e.target.style.transitionDelay = ((idx % 6) * 70 + Math.floor(idx / 6) * 40) + 'ms';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, {threshold:.2, rootMargin:'0px 0px -8% 0px'});
+    chips.forEach(function(c){ io.observe(c); });
+  })();
+
+  /* ---- 11. MAGNETIC BUTTONS ------------------------------------------ */
+  (function(){
+    if (REDUCED || matchMedia('(hover:none)').matches) return;
+    document.querySelectorAll('.btn').forEach(function(btn){
+      var raf = 0, tx = 0, ty = 0;
+      function move(e){
+        var r = btn.getBoundingClientRect();
+        tx = (e.clientX - (r.left + r.width/2)) * 0.28;
+        ty = (e.clientY - (r.top + r.height/2)) * 0.4;
+        if(!raf) raf = requestAnimationFrame(function(){ raf = 0; btn.style.transform = 'translate(' + tx + 'px,' + ty + 'px)'; });
+      }
+      function reset(){ btn.style.transform = ''; }
+      btn.addEventListener('pointermove', move);
+      btn.addEventListener('pointerleave', reset);
+    });
+  })();
 })();
