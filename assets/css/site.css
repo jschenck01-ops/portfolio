@@ -209,6 +209,17 @@ section{position:relative;padding:clamp(72px,12vh,150px) 0}
 .logos li{list-style:none;font-family:var(--display);font-weight:500;font-size:clamp(1.05rem,2.2vw,1.5rem);
   letter-spacing:-.01em;color:var(--dim);opacity:.85;transition:color .3s ease,opacity .3s ease}
 .logos li:hover{color:var(--bone);opacity:1}
+/* logo chip wall */
+.logo-wall{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.logo-chip{background:var(--bone);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  padding:22px 18px;min-height:104px;position:relative;overflow:hidden;
+  transition:transform .45s var(--ease),box-shadow .45s ease}
+.logo-chip img{max-height:54px;max-width:100%;width:auto;object-fit:contain;
+  filter:grayscale(.25);transition:filter .45s ease,transform .45s var(--ease)}
+.logo-chip:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.45)}
+.logo-chip:hover img{filter:grayscale(0);transform:scale(1.04)}
+@media (max-width:900px){.logo-wall{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:520px){.logo-wall{grid-template-columns:repeat(2,1fr);gap:10px}.logo-chip{min-height:88px;padding:18px 14px}.logo-chip img{max-height:44px}}
 
 /* ---------- THESIS ---------- */
 .thesis{min-height:190vh;padding:0}
