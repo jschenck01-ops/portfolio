@@ -56,6 +56,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ember);outline-offs
 }
 @media (prefers-reduced-motion:reduce){.grain{animation:none}}
 
+/* ---------- BRAND GRID DEPTH LAYER ---------- */
+.bg-grid{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:url("../img/brand-bg.png") center center / cover no-repeat;
+  opacity:.5;
+}
+
 /* ---------- SITE HEADER / NAV ---------- */
 .site-head{
   position:fixed;top:0;left:0;right:0;z-index:1000;
@@ -115,6 +122,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ember);outline-offs
 
 /* ---------- HERO ---------- */
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,var(--void) 20%,rgba(10,10,12,.5) 44%,transparent 66%)}
+.hero-photo{position:absolute;top:0;right:0;bottom:0;width:62%;z-index:1;pointer-events:none;
+  background:url("../img/hero.png") no-repeat right center;background-size:cover;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 50%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 50%)}
+@media (max-width:880px){
+  .hero-photo{width:100%;opacity:.26;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 58%);
+    mask-image:linear-gradient(180deg,transparent 0%,#000 58%)}
+}
 #noise{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
   mask-image:radial-gradient(ellipse 92% 74% at 50% 48%,#000 26%,transparent 76%);
   -webkit-mask-image:radial-gradient(ellipse 92% 74% at 50% 48%,#000 26%,transparent 76%)}
