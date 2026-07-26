@@ -174,27 +174,7 @@
     update();
   })();
 
-  /* ---- 9. HERO PARALLAX (mouse + scroll) ----------------------------- */
-  (function(){
-    if (REDUCED) return;
-    var photo = document.querySelector('.hero-photo');
-    var hero  = document.querySelector('.hero');
-    if(!photo || !hero) return;
-    var mx = 0, my = 0, sc = 0, raf = 0;
-    function apply(){
-      raf = 0;
-      photo.style.transform = 'translate3d(' + (mx * -16) + 'px,' + (sc * 0.08 + my * -12) + 'px,0) scale(1.06)';
-    }
-    function req(){ if(!raf) raf = requestAnimationFrame(apply); }
-    addEventListener('pointermove', function(e){
-      mx = (e.clientX / innerWidth - .5);
-      my = (e.clientY / innerHeight - .5);
-      req();
-    }, {passive:true});
-    addEventListener('scroll', function(){
-      if (scrollY < innerHeight){ sc = scrollY; req(); }
-    }, {passive:true});
-  })();
+  /* ---- 9. (hero photo is a fixed image, per Persona reference) -------- */
 
   /* ---- 10. STAGGERED LOGO REVEAL ------------------------------------- */
   (function(){
