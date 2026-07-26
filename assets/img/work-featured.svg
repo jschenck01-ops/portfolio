@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The full record placeholder">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15151A"/>
+      <stop offset="1" stop-color="#0A0A0C"/>
+    </linearGradient>
+    <pattern id="d" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#EFEDE6" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <rect width="1600" height="1000" fill="url(#d)"/>
+  <circle cx="1530" cy="70" r="12" fill="#FF4D1C"/>
+  <text x="60" y="904" font-family="'JetBrains Mono',monospace" font-size="22" letter-spacing="5" fill="#FF4D1C">SELECTED WORK</text>
+  <text x="58" y="954" font-family="'Bricolage Grotesque',sans-serif" font-weight="500" font-size="58" fill="#EFEDE6">The full record</text>
+  <text x="60" y="70" font-family="'JetBrains Mono',monospace" font-size="18" letter-spacing="3" fill="#6A6862">1600 × 1000</text>
+</svg>
