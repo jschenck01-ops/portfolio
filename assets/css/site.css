@@ -103,12 +103,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ember);outline-offs
 .nav-links a:hover::after,.nav-links a[aria-current="page"]::after{transform:scaleX(1);transform-origin:left}
 .nav-cta{display:inline-flex;align-items:center;gap:9px;
   font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--void);background:var(--bone);padding:12px 18px;text-decoration:none;
-  position:relative;overflow:hidden;isolation:isolate;transition:color .3s ease}
-.nav-cta::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ember);
+  color:var(--void);background:var(--ember);padding:12px 20px;text-decoration:none;border-radius:8px;
+  position:relative;overflow:hidden;isolation:isolate;box-shadow:0 8px 24px -8px var(--ember-soft);
+  transition:color .3s ease,box-shadow .3s ease,transform .3s var(--ease)}
+.nav-cta::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--void);
   transform:translateY(101%);transition:transform .4s var(--ease)}
 .nav-cta:hover::before{transform:translateY(0)}
-.nav-cta:hover{color:var(--void)}
+.nav-cta:hover{color:var(--bone);transform:translateY(-1px)}
 .nav-cta .ar{transition:transform .3s var(--ease)}
 .nav-cta:hover .ar{transform:translateX(4px)}
 .burger{display:none;background:none;border:0;cursor:pointer;width:38px;height:38px;
@@ -138,10 +139,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ember);outline-offs
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(90deg,var(--void) 30%,rgba(10,10,12,.55) 46%,transparent 62%)}
-.hero-photo{position:absolute;top:0;right:0;bottom:0;width:52%;z-index:1;pointer-events:none;
-  background:url("../img/hero.jpg") no-repeat right center;background-size:cover;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 34%);
-  mask-image:linear-gradient(90deg,transparent 0%,#000 34%)}
+.hero-photo{position:absolute;top:0;right:0;bottom:0;width:50%;z-index:1;pointer-events:none;
+  background:url("../img/hero.jpg") no-repeat center 12%;background-size:cover;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 28%)}
 @media (max-width:980px){
   .hero-photo{width:100%;opacity:.22;
     -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 60%);
@@ -173,7 +174,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ember);outline-offs
 /* buttons / links shared */
 .btn{position:relative;display:inline-flex;align-items:center;gap:12px;
   font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
-  text-decoration:none;color:var(--void);background:var(--bone);padding:17px 26px;
+  text-decoration:none;color:var(--void);background:var(--bone);padding:17px 26px;border-radius:9px;
   overflow:hidden;isolation:isolate;transition:color .3s ease,transform .35s var(--ease);will-change:transform}
 .btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ember);
   transform:translateY(101%);transition:transform .4s var(--ease)}
