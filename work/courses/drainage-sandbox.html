@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Drainage Sandbox</title>
+<meta name="description" content="An accessible sandbox simulation: place drainage features on a building site, set the storm, and run it to see where the site floods. Keyboard and screen-reader operable.">
+<style>
+  :root{
+    --void:#0A0A0C; --deep:#12121A; --card:#171722; --line:rgba(255,255,255,.12);
+    --bone:#EFEDE6; --dim:#9A98A2; --mute:#C4C2CC; --teal:#20D3C0; --teal-soft:rgba(32,211,192,.5);
+    --water:#3f7fd6; --flood:#E5674E;
+    --c-roof:#4a4550; --c-pave:#2b2b33; --c-lawn:#33422f; --c-perm:#3a4a52; --c-swale:#2f4a3f; --c-pond:#243a52;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void);color:var(--bone);
+    font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:clamp(20px,4vw,44px)}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--teal);color:var(--void);padding:8px 14px;border-radius:8px;z-index:9}
+  .wrap{max-width:1000px;margin:0 auto}
+  .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.08;margin:0 0 10px;letter-spacing:-.01em}
+  .lede{color:var(--mute);max-width:66ch;margin:0 0 24px}
+  .sim{display:grid;grid-template-columns:264px 1fr;gap:clamp(16px,3vw,28px);align-items:start}
+  @media(max-width:760px){.sim{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(14px,2.4vw,20px)}
+  .panel h2{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:0 0 14px}
+  .tools{display:grid;gap:8px}
+  .tool{display:flex;align-items:center;gap:11px;text-align:left;background:var(--void);border:1px solid var(--line);color:var(--bone);
+    border-radius:10px;padding:10px 12px;font:inherit;cursor:pointer;transition:border-color .2s}
+  .tool:hover{border-color:var(--teal-soft)}
+  .tool:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .tool[aria-pressed="true"]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-soft)}
+  .sw{width:20px;height:20px;border-radius:5px;flex:0 0 auto;border:1px solid rgba(255,255,255,.18)}
+  .tool .tn{font-weight:600;font-size:.92rem}
+  .tool .td{display:block;color:var(--mute);font-size:.76rem;margin-top:1px;font-weight:400}
+  .storm{margin:18px 0 0}
+  .storm label{display:flex;justify-content:space-between;align-items:baseline;font-size:.9rem;color:var(--bone);margin:0 0 8px}
+  .storm .val{font-family:ui-monospace,monospace;font-size:.85rem;color:var(--teal)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.14);outline:none;margin:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--teal);cursor:pointer;border:3px solid var(--void);box-shadow:0 0 0 1px var(--teal)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer;border:3px solid var(--void)}
+  input[type=range]:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
+  .acts{display:flex;gap:10px;margin-top:18px}
+  .btn{font:600 14px/1 inherit;padding:12px 16px;border-radius:10px;cursor:pointer;border:1px solid var(--teal);transition:transform .08s}
+  .btn.primary{background:var(--teal);color:var(--void);flex:1}
+  .btn.ghost{background:transparent;color:var(--bone);border-color:var(--line)}
+  .btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .btn:active{transform:translateY(1px)}
+  .stage h2{margin-bottom:4px}
+  .rain{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px}
+  .board{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0e0e14}
+  .row{display:grid}
+  .cell{position:relative;aspect-ratio:1/1;border:0;padding:0;cursor:pointer;outline-offset:-2px;
+    border-right:1px solid rgba(0,0,0,.35);border-bottom:1px solid rgba(0,0,0,.35);transition:background .2s}
+  .cell:focus-visible{outline:2px solid var(--teal);z-index:3}
+  .cell .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--water);opacity:.72;transition:height .5s ease}
+  @media(prefers-reduced-motion:reduce){.cell,.cell .fill{transition:none}}
+  .cell[data-flood="1"]{background:var(--flood)!important}
+  .cell[data-flood="1"]::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 5px,rgba(0,0,0,.18) 5px,rgba(0,0,0,.18) 10px)}
+  .cell .rf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:600 9px/1 ui-monospace,monospace;color:rgba(255,255,255,.7);letter-spacing:.08em;pointer-events:none}
+  .cell.roof{cursor:not-allowed}
+  .drain{display:flex;align-items:center;gap:8px;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:7px 10px;background:#0b0b11;border-top:1px solid var(--line)}
+  .drain b{color:var(--teal)}
+  .results{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 0}
+  @media(max-width:520px){.results{grid-template-columns:1fr}}
+  .rstat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .rstat .k{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+  .rstat .v{font-family:Georgia,serif;font-size:1.7rem;line-height:1;color:var(--bone)}
+  .rstat .v b{color:var(--teal)}
+  .rstat.bad .v b{color:var(--flood)}
+  .verdict{color:var(--mute);font-size:.95rem;margin:16px 0 0;min-height:1.3em}
+  .verdict b{color:var(--bone)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 0;font-size:.8rem;color:var(--mute)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<a class="skip" href="#board">Skip to the site</a>
+<div class="wrap">
+  <p class="eyebrow">Civil Engineering · Simulation</p>
+  <h1>Site Drainage Sandbox</h1>
+  <p class="lede">The building is fixed. The rain is coming. Choose a surface, paint it onto the site, then run the storm. Water runs downhill toward the storm drain along the bottom edge. Your job: get the flooded tiles to zero.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <h2>Surfaces</h2>
+      <div class="tools" id="tools" role="group" aria-label="Surface tools"></div>
+      <div class="storm">
+        <label for="rain">Storm intensity <span class="val" id="rainv">2.0 in</span></label>
+        <input type="range" id="rain" min="1" max="4" step="0.5" value="2">
+      </div>
+      <div class="acts">
+        <button class="btn primary" id="run" type="button">Run the storm</button>
+        <button class="btn ghost" id="clear" type="button" aria-label="Clear the site back to pavement">Clear</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <h2>The site</h2>
+      <p class="rain">Pick a surface, then click tiles to place it</p>
+      <div class="board" id="board">
+        <div id="rows"></div>
+        <div class="drain" aria-hidden="true"><span>&darr;&darr;&darr;</span> Storm drain (bottom edge) &middot; <span>capacity <b id="dcap">-</b></span></div>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i style="background:var(--water)"></i>Water held (working)</span>
+        <span><i style="background:var(--flood)"></i>Flooded</span>
+      </div>
+      <div class="results">
+        <div class="rstat" id="rs-flood"><p class="k">Flooded tiles</p><p class="v"><b id="fl">0</b></p></div>
+        <div class="rstat"><p class="k">Rain managed on-site</p><p class="v"><b id="mg">0</b>%</p></div>
+        <div class="rstat"><p class="k">To the drain</p><p class="v"><b id="dr">0</b>%</p></div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+    </div>
+  </div>
+  <p class="live" id="live" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var COLS=8, ROWS=5;
+  // surface types: absorb (inches soaked this storm), store (inches it can pond before overflowing), water (designed to hold)
+  var TYPE={
+    roof:    {name:"Roof",             desc:"Fixed. Sheds every drop.",        absorb:0,   store:0,    water:false, cls:"roof", sw:"var(--c-roof)"},
+    pave:    {name:"Pavement",         desc:"Impervious. Water runs off.",     absorb:0.1, store:0.05, water:false, cls:"pave", sw:"var(--c-pave)"},
+    lawn:    {name:"Lawn",             desc:"Soaks up a moderate storm.",      absorb:0.9, store:0.25, water:false, cls:"lawn", sw:"var(--c-lawn)"},
+    perm:    {name:"Permeable paving", desc:"Drains through the surface.",     absorb:2.0, store:0.4,  water:false, cls:"perm", sw:"var(--c-perm)"},
+    swale:   {name:"Grassy swale",     desc:"Carries and soaks runoff.",       absorb:1.2, store:1.6,  water:true,  cls:"swale",sw:"var(--c-swale)"},
+    pond:    {name:"Retention pond",   desc:"Deep storage for big storms.",    absorb:3.0, store:10,   water:true,  cls:"pond", sw:"var(--c-pond)"}
+  };
+  var PALETTE=["pave","lawn","perm","swale","pond"];
+  var DRAINCAP=COLS*1.0; // total inches the bottom drain can carry off-site before the street floods
+  document.getElementById('dcap').textContent=DRAINCAP.toFixed(0)+' in';
+
+  // building footprint (locked roof): rows 1..2, cols 3..5
+  function isRoof(r,c){ return r>=1 && r<=2 && c>=3 && c<=5; }
+
+  var grid=[]; for(var r=0;r<ROWS;r++){ grid[r]=[]; for(var c=0;c<COLS;c++){ grid[r][c]=isRoof(r,c)?"roof":"pave"; } }
+
+  var tool="perm";
+  var toolsEl=document.getElementById('tools');
+  PALETTE.forEach(function(k){
+    var t=TYPE[k];
+    var b=document.createElement('button');
+    b.type='button'; b.className='tool'; b.dataset.k=k;
+    b.setAttribute('aria-pressed', k===tool?'true':'false');
+    b.innerHTML='<span class="sw" style="background:'+t.sw+'"></span><span><span class="tn">'+t.name+'</span><span class="td">'+t.desc+'</span></span>';
+    b.addEventListener('click',function(){
+      tool=k;
+      [].forEach.call(toolsEl.children,function(x){ x.setAttribute('aria-pressed', x.dataset.k===k?'true':'false'); });
+      live.textContent=t.name+' selected. Click a tile to place it.';
+    });
+    toolsEl.appendChild(b);
+  });
+
+  var rowsEl=document.getElementById('rows');
+  var cells=[];
+  function celLabel(r,c){ return 'Row '+(r+1)+' column '+(c+1)+', '+TYPE[grid[r][c]].name; }
+  for(var r=0;r<ROWS;r++){
+    var row=document.createElement('div'); row.className='row'; row.style.gridTemplateColumns='repeat('+COLS+',1fr)';
+    cells[r]=[];
+    for(var c=0;c<COLS;c++){
+      var cell=document.createElement('button');
+      cell.type='button'; cell.className='cell '+TYPE[grid[r][c]].cls;
+      cell.style.background=TYPE[grid[r][c]].sw;
+      cell.dataset.r=r; cell.dataset.c=c;
+      cell.tabIndex=(r===0&&c===0)?0:-1;
+      cell.setAttribute('aria-label',celLabel(r,c));
+      if(isRoof(r,c)){ cell.classList.add('roof'); cell.innerHTML='<span class="rf">ROOF</span>'; }
+      else cell.innerHTML='<span class="fill"></span>';
+      row.appendChild(cell); cells[r][c]=cell;
+    }
+    rowsEl.appendChild(row);
+  }
+
+  var live=document.getElementById('live');
+  function paint(r,c){
+    if(isRoof(r,c)){ live.textContent='That tile is the building. It cannot change.'; return; }
+    grid[r][c]=tool;
+    var t=TYPE[tool], cell=cells[r][c];
+    cell.className='cell '+t.cls; cell.style.background=t.sw;
+    cell.innerHTML='<span class="fill"></span>';
+    cell.setAttribute('aria-label',celLabel(r,c));
+    clearRun();
+    live.textContent=t.name+' placed at row '+(r+1)+', column '+(c+1)+'.';
+  }
+
+  rowsEl.addEventListener('click',function(e){
+    var cell=e.target.closest('.cell'); if(!cell) return;
+    paint(+cell.dataset.r,+cell.dataset.c);
+  });
+  // roving-tabindex keyboard grid
+  rowsEl.addEventListener('keydown',function(e){
+    var cell=e.target.closest('.cell'); if(!cell) return;
+    var r=+cell.dataset.r, c=+cell.dataset.c, nr=r, nc=c;
+    if(e.key==='ArrowRight') nc=Math.min(COLS-1,c+1);
+    else if(e.key==='ArrowLeft') nc=Math.max(0,c-1);
+    else if(e.key==='ArrowDown') nr=Math.min(ROWS-1,r+1);
+    else if(e.key==='ArrowUp') nr=Math.max(0,r-1);
+    else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); paint(r,c); return; }
+    else return;
+    e.preventDefault();
+    cell.tabIndex=-1; var n=cells[nr][nc]; n.tabIndex=0; n.focus();
+  });
+
+  // ---- simulation ----
+  var ran=false;
+  function clearRun(){
+    if(!ran) return; ran=false;
+    for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+      var cell=cells[r][c]; cell.removeAttribute('data-flood');
+      var f=cell.querySelector('.fill'); if(f) f.style.height='0';
+      cell.setAttribute('aria-label',celLabel(r,c));
+    }
+    document.getElementById('verdict').textContent='';
+  }
+
+  function run(){
+    var rain=+document.getElementById('rain').value;
+    var flooded=0, soakedTotal=0, heldTotal=0, drainTotal=0;
+    var total=ROWS*COLS*rain;
+    var floodMap=[]; var fillMap=[];
+    for(var c=0;c<COLS;c++){
+      var carry=0;
+      for(var r=0;r<ROWS;r++){
+        var t=TYPE[grid[r][c]];
+        var incoming=rain+carry;
+        var soaked=Math.min(incoming,t.absorb);
+        var remaining=incoming-soaked;
+        var held=Math.min(remaining,t.store);
+        var overflow=remaining-held;
+        soakedTotal+=soaked;
+        if(!floodMap[r]) floodMap[r]=[]; if(!fillMap[r]) fillMap[r]=[];
+        if(t.water){
+          heldTotal+=held;
+          fillMap[r][c]=t.store>0?Math.max(0.08,Math.min(1,held/t.store)):0;
+          floodMap[r][c]=false;
+        } else if(grid[r][c]==='roof'){
+          fillMap[r][c]=0; floodMap[r][c]=false; // roof sheds to grade, never ponds
+        } else {
+          fillMap[r][c]=0;
+          if(remaining> t.store+1e-9){ floodMap[r][c]=true; flooded++; }
+          else floodMap[r][c]=false;
+        }
+        carry=overflow;
+      }
+      drainTotal+=carry;
+    }
+    // paint results
+    for(var r2=0;r2<ROWS;r2++)for(var c2=0;c2<COLS;c2++){
+      var cell=cells[r2][c2];
+      if(floodMap[r2][c2]){ cell.setAttribute('data-flood','1'); cell.setAttribute('aria-label',celLabel(r2,c2)+', flooded'); }
+      else { cell.removeAttribute('data-flood'); }
+      var f=cell.querySelector('.fill');
+      if(f){ f.style.height=(fillMap[r2][c2]*100)+'%'; if(fillMap[r2][c2]>0) cell.setAttribute('aria-label',celLabel(r2,c2)+', holding water'); }
+    }
+    ran=true;
+    var managedPct=Math.round((soakedTotal+heldTotal)/total*100);
+    var drainPct=Math.max(0,Math.min(100,Math.round(drainTotal/total*100)));
+    var streetFlood=drainTotal>DRAINCAP;
+    document.getElementById('fl').textContent=flooded;
+    document.getElementById('mg').textContent=managedPct;
+    document.getElementById('dr').textContent=drainPct;
+    document.getElementById('rs-flood').classList.toggle('bad',flooded>0);
+    var v=document.getElementById('verdict');
+    if(flooded===0 && !streetFlood)
+      v.innerHTML='<b>The site holds.</b> Every tile stays dry and the drain is within capacity, even at '+rain.toFixed(1)+' inches. That is what green infrastructure buys you.';
+    else if(streetFlood && flooded===0)
+      v.innerHTML='<b>Tiles dry, drain overwhelmed.</b> The surfaces cope, but more runoff reaches the drain than it can carry. Add a pond or swale near the bottom to store the overflow.';
+    else
+      v.innerHTML='<b>'+flooded+' tile'+(flooded===1?'':'s')+' underwater.</b> Impervious surfaces are shedding faster than the site can soak. Trade pavement for permeable paving, lawn, swales, and a retention pond downhill.';
+    live.textContent=flooded+' flooded tiles. '+managedPct+' percent of the rain managed on site.';
+  }
+
+  document.getElementById('run').addEventListener('click',run);
+  document.getElementById('rain').addEventListener('input',function(){
+    document.getElementById('rainv').textContent=(+this.value).toFixed(1)+' in'; clearRun();
+  });
+  document.getElementById('clear').addEventListener('click',function(){
+    for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){ if(!isRoof(r,c)) grid[r][c]='pave'; }
+    for(var r3=0;r3<ROWS;r3++)for(var c3=0;c3<COLS;c3++){
+      if(isRoof(r3,c3)) continue;
+      var cell=cells[r3][c3]; cell.className='cell pave'; cell.style.background=TYPE.pave.sw;
+      cell.innerHTML='<span class="fill"></span>'; cell.setAttribute('aria-label',celLabel(r3,c3));
+    }
+    clearRun();
+    document.getElementById('fl').textContent='0';
+    document.getElementById('mg').textContent='0';
+    document.getElementById('dr').textContent='0';
+    document.getElementById('rs-flood').classList.remove('bad');
+    live.textContent='Site cleared back to pavement.';
+  });
+})();
+</script>
+</body>
+</html>
