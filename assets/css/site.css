@@ -333,7 +333,9 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
 /* ---------- PORTFOLIO (compact grid) ---------- */
 .pf-cat{margin-top:clamp(56px,7vw,84px)}
 .pf-cat:first-of-type{margin-top:clamp(32px,4vw,44px)}
-.pf-cat > .lede{color:var(--dim);font-size:.98rem;line-height:1.5;max-width:56ch;margin-top:10px}
+.pf-title{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.4vw,2.5rem);
+  letter-spacing:-.015em;line-height:1.02;color:var(--ember)}
+.pf-cat > .lede{color:var(--mute);font-size:1.02rem;line-height:1.5;max-width:56ch;margin-top:12px}
 .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
 .pf-card{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);
   box-shadow:var(--card-sh);overflow:hidden;display:flex;flex-direction:column;
