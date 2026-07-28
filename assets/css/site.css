@@ -450,6 +450,8 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
   margin-top:22px;padding-bottom:26px;border-bottom:1px solid var(--rule)}
 .a-hero{margin:30px 0 8px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--rule);box-shadow:var(--card-sh)}
 .a-hero img{width:100%;display:block}
+/* tall/portrait screenshot hero framed as a banner instead of a towering image */
+.a-hero.shot img{height:clamp(240px,40vw,400px);object-fit:cover;object-position:50% 30%}
 .article .prose{margin-top:24px}
 .article .prose p{color:#C9C7BF;font-size:1.12rem;line-height:1.72;margin-top:1.15em}
 .a-head{font-family:var(--display);font-weight:800;font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;
