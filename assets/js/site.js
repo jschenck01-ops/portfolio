@@ -209,4 +209,25 @@
       btn.addEventListener('pointerleave', reset);
     });
   })();
+
+  /* ---- 12. YOUTUBE CLICK-TO-LOAD FACADES ----------------------------- */
+  (function(){
+    var nodes = document.querySelectorAll('.yt');
+    if(!nodes.length) return;
+    nodes.forEach(function(el){
+      var btn = el.querySelector('button');
+      if(!btn) return;
+      btn.addEventListener('click', function(){
+        var id = el.getAttribute('data-id');
+        if(!id) return;
+        var f = document.createElement('iframe');
+        f.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+        f.title = el.getAttribute('data-title') || 'Video';
+        f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        f.setAttribute('allowfullscreen','');
+        el.innerHTML = '';
+        el.appendChild(f);
+      });
+    });
+  })();
 })();
