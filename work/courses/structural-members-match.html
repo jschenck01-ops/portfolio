@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Path: Match the Structural Member to Its Job</title>
+<meta name="description" content="An accessible matching activity: pair six structural members with the job each one does. Keyboard, screen-reader, and pointer operable.">
+<style>
+  :root{
+    --void:#0A0A0C; --deep:#12121A; --card:#171722; --line:rgba(255,255,255,.12);
+    --bone:#EFEDE6; --dim:#9A98A2; --mute:#C4C2CC; --teal:#20D3C0; --teal-soft:rgba(32,211,192,.5);
+    --ok:#20D3C0; --no:#E5674E;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void);color:var(--bone);
+    font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;padding:clamp(20px,4vw,44px)}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--teal);color:var(--void);padding:8px 14px;border-radius:8px;z-index:9}
+  .wrap{max-width:860px;margin:0 auto}
+  .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.08;margin:0 0 12px;letter-spacing:-.01em}
+  .lede{color:var(--mute);max-width:60ch;margin:0 0 8px}
+  .how{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:22px 0 26px;color:var(--mute);font-size:.95rem}
+  .how b{color:var(--bone)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,3vw,26px)}
+  @media(max-width:620px){.grid{grid-template-columns:1fr}}
+  .col h2{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:0 0 12px}
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .chip{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--bone);
+    border-radius:12px;padding:15px 16px;font:inherit;cursor:pointer;transition:border-color .2s,background .2s,transform .1s;position:relative}
+  .chip:hover{border-color:var(--teal-soft)}
+  .chip:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .chip:active{transform:translateY(1px)}
+  .chip .fn{color:var(--mute);font-size:.92rem;display:block;margin-top:3px}
+  .chip[aria-pressed="true"]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-soft),0 0 24px -6px var(--teal-soft)}
+  .chip[data-state="paired"]{border-color:var(--teal-soft)}
+  .chip[data-state="paired"]::after{content:attr(data-pairtag);position:absolute;top:10px;right:12px;
+    font:600 10px/1 ui-monospace,monospace;letter-spacing:.1em;color:var(--void);background:var(--teal);padding:4px 7px;border-radius:20px}
+  .chip[data-result="ok"]{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+  .chip[data-result="no"]{border-color:var(--no);box-shadow:0 0 0 1px var(--no)}
+  .chip[data-result="ok"]::after{background:var(--ok);content:"✓ "attr(data-pairtag)}
+  .chip[data-result="no"]::after{background:var(--no);content:"✕ "attr(data-pairtag)}
+  .chip:disabled{cursor:default;opacity:1}
+  .bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:28px}
+  .btn{font:600 14px/1 inherit;padding:13px 22px;border-radius:10px;border:1px solid var(--teal);cursor:pointer;transition:transform .1s,box-shadow .2s}
+  .btn.primary{background:var(--teal);color:var(--void);box-shadow:0 10px 26px -12px var(--teal-soft)}
+  .btn.ghost{background:transparent;color:var(--bone);border-color:var(--line)}
+  .btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .btn:active{transform:translateY(1px)}
+  .status{margin-left:auto;font-family:ui-monospace,monospace;font-size:13px;color:var(--mute)}
+  .status b{color:var(--teal)}
+  .live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<a class="skip" href="#activity">Skip to the activity</a>
+<div class="wrap">
+  <p class="eyebrow">Civil Engineering · Structures Module</p>
+  <h1>Load Path: Match the Member to Its Job</h1>
+  <p class="lede">Every structure moves load from where it lands to the ground. Match each structural member to the job it does along that path.</p>
+  <div class="how"><b>How it works.</b> Select a member on the left, then select the job on the right that it performs. Pairs lock in as you go. Change a pairing by selecting the member again. When all six are set, choose <b>Check answers</b>.</div>
+
+  <div id="activity" class="grid">
+    <div class="col">
+      <h2>Structural member</h2>
+      <ul id="members"></ul>
+    </div>
+    <div class="col">
+      <h2>What it does</h2>
+      <ul id="jobs"></ul>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="check" type="button">Check answers</button>
+    <button class="btn ghost" id="reset" type="button">Reset</button>
+    <span class="status" id="status" aria-hidden="true">0 of 6 matched</span>
+  </div>
+  <p class="live" id="live" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // member -> correct job
+  var PAIRS = [
+    {m:"Beam",       j:"Resists bending from loads across its span"},
+    {m:"Column",     j:"Carries axial compression down to the foundation"},
+    {m:"Truss",      j:"Spans long distances through triangulated members"},
+    {m:"Foundation", j:"Transfers the building's loads into the ground"},
+    {m:"Cable",      j:"Carries pure tension in a suspension system"},
+    {m:"Arch",       j:"Redirects load into compression along its curve"}
+  ];
+  // deterministic shuffle for the jobs column (fixed order, no Math.random)
+  var jobOrder = [3,0,5,1,4,2];
+  var members = document.getElementById('members');
+  var jobs = document.getElementById('jobs');
+  var live = document.getElementById('live');
+  var statusEl = document.getElementById('status');
+  var selectedMember = null;   // index into PAIRS
+  var assign = {};             // memberIndex -> jobIndex(original)
+  var tagOf = {};              // memberIndex -> letter tag
+
+  function chip(label, sub, kind, idx){
+    var li=document.createElement('li');
+    var b=document.createElement('button');
+    b.type='button'; b.className='chip'; b.dataset.kind=kind; b.dataset.idx=idx;
+    b.innerHTML = '<span class="mn">'+label+'</span>'+(sub?'<span class="fn">'+sub+'</span>':'');
+    if(kind==='member'){ b.setAttribute('aria-pressed','false'); }
+    li.appendChild(b); return li;
+  }
+  PAIRS.forEach(function(p,i){ members.appendChild(chip(p.m,'','member',i)); });
+  jobOrder.forEach(function(orig){ jobs.appendChild(chip(PAIRS[orig].j,'','job',orig)); });
+
+  function letter(n){ return String.fromCharCode(65+n); }
+  function paintPairTags(){
+    // assign stable letters by member index that has an assignment
+    var used={}; var next=0;
+    Object.keys(assign).forEach(function(mi){
+      if(tagOf[mi]==null){ tagOf[mi]=letter(next++); }
+    });
+    // recompute cleanly
+    tagOf={}; next=0;
+    Object.keys(assign).sort(function(a,b){return a-b;}).forEach(function(mi){ tagOf[mi]=letter(next++); });
+  }
+  function render(){
+    paintPairTags();
+    [].forEach.call(members.querySelectorAll('.chip'),function(b){
+      var i=+b.dataset.idx;
+      b.setAttribute('aria-pressed', selectedMember===i ? 'true':'false');
+      if(assign[i]!=null){ b.dataset.state='paired'; b.dataset.pairtag=tagOf[i]; }
+      else { b.removeAttribute('data-state'); b.removeAttribute('data-pairtag'); }
+      b.removeAttribute('data-result');
+    });
+    [].forEach.call(jobs.querySelectorAll('.chip'),function(b){
+      var oj=+b.dataset.idx; var owner=null;
+      Object.keys(assign).forEach(function(mi){ if(assign[mi]===oj) owner=mi; });
+      if(owner!=null){ b.dataset.state='paired'; b.dataset.pairtag=tagOf[owner]; }
+      else { b.removeAttribute('data-state'); b.removeAttribute('data-pairtag'); }
+      b.removeAttribute('data-result');
+    });
+    var n=Object.keys(assign).length;
+    statusEl.textContent = n+' of 6 matched';
+  }
+
+  members.addEventListener('click', function(e){
+    var b=e.target.closest('.chip'); if(!b) return;
+    var i=+b.dataset.idx;
+    selectedMember = (selectedMember===i)? null : i;
+    // if this member was already paired and we re-select it, free its job to allow reassignment
+    render();
+    if(selectedMember!=null) live.textContent = PAIRS[i].m+' selected. Now choose the job it performs.';
+  });
+  jobs.addEventListener('click', function(e){
+    var b=e.target.closest('.chip'); if(!b) return;
+    var oj=+b.dataset.idx;
+    if(selectedMember==null){ live.textContent='Select a structural member first, then choose its job.'; return; }
+    // remove any existing owner of this job
+    Object.keys(assign).forEach(function(mi){ if(assign[mi]===oj) delete assign[mi]; });
+    assign[selectedMember]=oj;
+    live.textContent = PAIRS[selectedMember].m+' paired with: '+PAIRS[oj].j+'.';
+    selectedMember=null;
+    render();
+  });
+
+  document.getElementById('check').addEventListener('click', function(){
+    if(Object.keys(assign).length<6){ live.textContent='Match all six members before checking. '+ (6-Object.keys(assign).length)+' left.'; return; }
+    var correct=0;
+    PAIRS.forEach(function(p,i){
+      var mb=members.querySelector('.chip[data-idx="'+i+'"]');
+      var ok=(assign[i]===i);
+      if(ok) correct++;
+      mb.dataset.result = ok?'ok':'no';
+      var oj=assign[i];
+      var jb=jobs.querySelector('.chip[data-idx="'+oj+'"]');
+      if(jb) jb.dataset.result = ok?'ok':'no';
+    });
+    statusEl.innerHTML = '<b>'+correct+'</b> of 6 correct';
+    live.textContent = 'You matched '+correct+' of 6 correctly.'+(correct===6?' Every member is on the right load path.':' Re-select any member to change its pairing, then check again.');
+  });
+  document.getElementById('reset').addEventListener('click', function(){
+    assign={}; selectedMember=null; tagOf={};
+    render(); statusEl.textContent='0 of 6 matched'; live.textContent='Activity reset. Six members to match.';
+  });
+  render();
+})();
+</script>
+</body>
+</html>
