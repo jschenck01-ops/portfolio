@@ -337,7 +337,10 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
 .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
 .pf-card{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);
   box-shadow:var(--card-sh);overflow:hidden;display:flex;flex-direction:column;
+  text-decoration:none;color:inherit;
   transition:transform .55s var(--ease),box-shadow .55s var(--ease)}
+.pf-card .k{transition:color .3s ease}
+.pf-card:hover .k{color:var(--mute)}
 .pf-card:hover{transform:translateY(-5px);box-shadow:var(--card-glow)}
 .pf-card .thumb{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--deep)}
 .pf-card .thumb img{width:100%;height:100%;object-fit:cover;
@@ -430,6 +433,24 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
 .a-back{display:inline-flex;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--mute);text-decoration:none;margin-top:44px;transition:color .25s ease}
 .a-back:hover{color:var(--ember)}
+
+/* ---------- CASE STUDY ---------- */
+.cs-sub{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(1.15rem,2vw,1.5rem);
+  color:var(--mute);line-height:1.4;margin-top:16px}
+.cs-genre{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ember);margin-top:22px;line-height:1.7}
+.cs-deliv{list-style:none;margin:18px 0 6px;padding:0;display:grid;gap:10px}
+.cs-deliv li{position:relative;padding-left:24px;color:#C9C7BF;font-size:1.02rem;line-height:1.5}
+.cs-deliv li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:2px;
+  background:var(--ember);box-shadow:0 0 12px var(--ember-soft)}
+.cs-gallery{margin:44px 0 8px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cs-gallery figure{margin:0}
+.cs-gallery.single{grid-template-columns:1fr}
+@media (max-width:640px){.cs-gallery{grid-template-columns:1fr}}
+.cs-results{margin-top:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.cs-result{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);
+  box-shadow:var(--card-sh);padding:24px 26px}
+.cs-result p{color:var(--mute);font-size:.98rem;line-height:1.5;margin:0}
 
 /* ---------- FOOTER ---------- */
 .site-foot{border-top:1px solid var(--rule);padding:clamp(56px,8vh,88px) 0 40px}
