@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomy of a Course People Finish</title>
+<meta name="description" content="An accessible tabbed content presentation: the four parts of a lesson that keeps students moving. Keyboard and screen-reader operable.">
+<style>
+  :root{
+    --void:#0A0A0C; --deep:#12121A; --card:#171722; --line:rgba(255,255,255,.12);
+    --bone:#EFEDE6; --dim:#9A98A2; --mute:#C4C2CC; --teal:#20D3C0; --teal-soft:rgba(32,211,192,.5);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void);color:var(--bone);
+    font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;padding:clamp(20px,4vw,44px)}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--teal);color:var(--void);padding:8px 14px;border-radius:8px;z-index:9}
+  .wrap{max-width:860px;margin:0 auto}
+  .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.08;margin:0 0 12px;letter-spacing:-.01em}
+  .lede{color:var(--mute);max-width:60ch;margin:0 0 26px}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);margin-bottom:0;padding-bottom:0}
+  .tab{font:600 14px/1 inherit;background:transparent;color:var(--mute);border:1px solid transparent;border-bottom:none;
+    padding:13px 18px;border-radius:12px 12px 0 0;cursor:pointer;transition:color .2s,background .2s;position:relative;top:1px}
+  .tab .num{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);margin-right:8px}
+  .tab:hover{color:var(--bone)}
+  .tab:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .tab[aria-selected="true"]{color:var(--bone);background:var(--card);border-color:var(--line);border-bottom-color:var(--card)}
+  .tab[aria-selected="true"] .num{color:var(--teal)}
+  .panels{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 16px 16px;padding:clamp(20px,3.5vw,34px)}
+  .panel{display:none;animation:fade .3s ease}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.panel{animation:none}}
+  .panel h2{font-family:Georgia,serif;font-size:1.5rem;margin:0 0 6px;color:var(--bone)}
+  .panel .kicker{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:0 0 14px}
+  .panel p{color:var(--mute);margin:0 0 14px;max-width:62ch}
+  .panel p:last-child{margin-bottom:0}
+  .panel b{color:var(--bone)}
+  .ex{border-left:2px solid var(--teal-soft);padding:2px 0 2px 16px;margin:16px 0 0;color:var(--bone);font-style:italic}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+  .dots{display:flex;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+  .dot.on{background:var(--teal);transform:scale(1.3)}
+  .next{font:600 14px/1 inherit;background:var(--teal);color:var(--void);border:none;padding:12px 20px;border-radius:10px;cursor:pointer;transition:transform .1s}
+  .next:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .next:active{transform:translateY(1px)}
+  .live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<a class="skip" href="#tabs">Skip to the lesson tabs</a>
+<div class="wrap">
+  <p class="eyebrow">Learning Design · Content Presentation</p>
+  <h1>Anatomy of a Course People Finish</h1>
+  <p class="lede">Before a single interaction, the content itself has to earn the next click. Move through the four parts of a lesson that keeps a student going.</p>
+
+  <div class="tabs" id="tabs" role="tablist" aria-label="Parts of a lesson">
+    <button class="tab" role="tab" id="t0" aria-controls="p0" aria-selected="true"><span class="num">01</span>The Hook</button>
+    <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="false" tabindex="-1"><span class="num">02</span>The Frame</button>
+    <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1"><span class="num">03</span>The Turn</button>
+    <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1"><span class="num">04</span>The Payoff</button>
+  </div>
+
+  <div class="panels">
+    <div class="panel show" id="p0" role="tabpanel" aria-labelledby="t0" tabindex="0">
+      <p class="kicker">Open the loop</p>
+      <h2>The Hook</h2>
+      <p>Attention is not owed, it is borrowed. The first fifteen seconds open a question the student now needs answered. Not a summary of what is coming, a reason to stay.</p>
+      <p class="ex">A pope once dug up his dead predecessor and put the corpse on trial. By the end of this lesson you will know why, and what it tells us about power.</p>
+    </div>
+    <div class="panel" id="p1" role="tabpanel" aria-labelledby="t1" tabindex="0" hidden>
+      <p class="kicker">Give it a shape</p>
+      <h2>The Frame</h2>
+      <p>People remember structure, not sentences. The frame tells the student where they are and how many steps remain, so nothing feels endless.</p>
+      <p>Three beats, named up front: <b>what happened</b>, <b>why it happened</b>, <b>what it means now</b>. The map is the lesson before the lesson.</p>
+    </div>
+    <div class="panel" id="p2" role="tabpanel" aria-labelledby="t2" tabindex="0" hidden>
+      <p class="kicker">Deliver the shift</p>
+      <h2>The Turn</h2>
+      <p>Every lesson worth finishing has one moment where the student's understanding tilts. Everything before it was setup. The turn is the point you were paying for.</p>
+      <p class="ex">The trial was not madness. It was a legal maneuver to erase a rival's decrees, a lesson in how institutions rewrite their own history.</p>
+    </div>
+    <div class="panel" id="p3" role="tabpanel" aria-labelledby="t3" tabindex="0" hidden>
+      <p class="kicker">Close the loop</p>
+      <h2>The Payoff</h2>
+      <p>The hook made a promise. The payoff keeps it, out loud, so the student feels the click of a thing completed and reaches for the next one.</p>
+      <p>Completion is a feeling before it is a metric. Give it to them on purpose, every single lesson, and the numbers follow.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="dots" aria-hidden="true"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <button class="next" id="next" type="button">Next part <span aria-hidden="true">&rarr;</span></button>
+  </div>
+  <p class="live" id="live" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  var panels=[].slice.call(document.querySelectorAll('[role="tabpanel"]'));
+  var dots=[].slice.call(document.querySelectorAll('.dot'));
+  var live=document.getElementById('live');
+  var cur=0;
+  function select(i,focus){
+    cur=i;
+    tabs.forEach(function(t,n){
+      var on=n===i;
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.tabIndex=on?0:-1;
+      if(on&&focus) t.focus();
+    });
+    panels.forEach(function(p,n){
+      var on=n===i;
+      p.classList.toggle('show',on);
+      if(on) p.removeAttribute('hidden'); else p.setAttribute('hidden','');
+    });
+    dots.forEach(function(d,n){ d.classList.toggle('on',n===i); });
+    live.textContent='Part '+(i+1)+' of 4: '+tabs[i].textContent.replace(/^\d+/,'').trim()+'.';
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){ select(i,false); });
+    t.addEventListener('keydown',function(e){
+      var k=e.key, n=null;
+      if(k==='ArrowRight'||k==='ArrowDown') n=(i+1)%tabs.length;
+      else if(k==='ArrowLeft'||k==='ArrowUp') n=(i-1+tabs.length)%tabs.length;
+      else if(k==='Home') n=0; else if(k==='End') n=tabs.length-1;
+      if(n!==null){ e.preventDefault(); select(n,true); }
+    });
+  });
+  document.getElementById('next').addEventListener('click',function(){ select((cur+1)%tabs.length,true); });
+  select(0,false);
+})();
+</script>
+</body>
+</html>

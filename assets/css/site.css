@@ -509,6 +509,20 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
 .course-pane .pane-head a{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-decoration:none;white-space:nowrap;transition:color .25s ease}
 .course-pane .pane-head a:hover{color:var(--ember)}
 .course-pane iframe{width:100%;height:min(80vh,760px);border:0;display:block;background:#fff}
+/* complexity-level ladder on the interactives page */
+.levels{margin:40px 0 8px}
+.level{padding:34px 0;border-top:1px solid var(--rule)}
+.level:first-of-type{border-top:0}
+.level-head{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+@media (max-width:560px){.level-head{grid-template-columns:1fr;gap:10px}}
+.level-badge{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);
+  border:1px solid var(--ember-soft);border-radius:100px;padding:8px 14px;white-space:nowrap;align-self:start;
+  display:inline-flex;align-items:center;gap:8px}
+.level-badge .lv{font-family:var(--display);font-size:1rem;font-weight:800;letter-spacing:0;color:var(--bone)}
+.level-title{font-family:var(--display);font-weight:500;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;margin:0 0 8px;line-height:1.12}
+.level-desc{color:var(--mute);font-size:1rem;line-height:1.6;margin:0;max-width:64ch}
+.level-desc .poc{color:var(--faint,#78767f);display:block;margin-top:8px;font-size:.9rem;font-family:var(--mono);letter-spacing:.03em}
+.level-desc .poc b{color:var(--ember);font-family:var(--mono);font-weight:500}
 
 /* ---------- FOOTER ---------- */
 .site-foot{border-top:1px solid var(--rule);padding:clamp(56px,8vh,88px) 0 40px}
