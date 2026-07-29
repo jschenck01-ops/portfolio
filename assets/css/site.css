@@ -497,6 +497,13 @@ section{position:relative;padding:clamp(52px,8vh,100px) 0}
 .cs-gallery figure{margin:0}
 .cs-gallery.single{grid-template-columns:1fr}
 .cs-gallery.g3{grid-template-columns:repeat(3,1fr)}
+/* uniform, filled cards: each row shares one aspect ratio and covers the cell */
+.cs-gallery.gport figure,.cs-gallery.gsq figure,.cs-gallery.gland figure{overflow:hidden}
+.cs-gallery.gport figure{aspect-ratio:3/4}
+.cs-gallery.gsq figure{aspect-ratio:1/1}
+.cs-gallery.gland figure{aspect-ratio:3/2}
+.cs-gallery.gport figure img,.cs-gallery.gsq figure img,.cs-gallery.gland figure img{width:100%;height:100%;object-fit:cover;object-position:center}
+.cs-gallery.gport figure img{object-position:center 22%}
 @media (max-width:640px){.cs-gallery,.cs-gallery.g3{grid-template-columns:1fr}}
 /* a single video dropped into the body flow to break up the text */
 .cs-video-feature{margin:40px 0}
