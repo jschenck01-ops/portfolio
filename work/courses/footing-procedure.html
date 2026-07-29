@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pour a Footing, In the Right Order</title>
+<meta name="description" content="An accessible procedural interactive with audio and visual feedback: perform the six steps of pouring a concrete footing in the correct sequence. Keyboard and screen-reader operable.">
+<style>
+  :root{
+    --void:#0A0A0C; --deep:#12121A; --card:#171722; --line:rgba(255,255,255,.12);
+    --bone:#EFEDE6; --dim:#9A98A2; --mute:#C4C2CC; --teal:#20D3C0; --teal-soft:rgba(32,211,192,.5);
+    --ok:#20D3C0; --no:#E5674E; --soil:#3b332a; --soil2:#2c261f; --form:#b98a54; --steel:#8a8f98; --concrete:#6d7178;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void);color:var(--bone);
+    font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;padding:clamp(20px,4vw,44px)}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--teal);color:var(--void);padding:8px 14px;border-radius:8px;z-index:9}
+  .wrap{max-width:900px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
+  .lede{color:var(--mute);max-width:60ch;margin:0 0 22px}
+  .mute-btn{font:600 12px/1 inherit;background:transparent;color:var(--mute);border:1px solid var(--line);border-radius:100px;padding:9px 14px;cursor:pointer;white-space:nowrap;display:inline-flex;gap:7px;align-items:center;transition:border-color .2s,color .2s}
+  .mute-btn:hover{border-color:var(--teal-soft);color:var(--bone)}
+  .mute-btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .mute-btn .ic{width:14px;height:14px;fill:currentColor}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(16px,3vw,28px);align-items:start;margin-top:4px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .scene{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative}
+  .scene svg{width:100%;height:auto;display:block;border-radius:10px;background:linear-gradient(#0d0d13,#101018)}
+  .scene .cap{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;margin:12px 2px 2px;text-transform:uppercase}
+  .lyr{opacity:0;transition:opacity .5s ease}
+  .lyr.on{opacity:1}
+  .plug{transition:opacity .5s ease}
+  .plug.off{opacity:0}
+  @media(prefers-reduced-motion:reduce){.lyr,.plug{transition:none}}
+  .steps{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(14px,2.5vw,20px)}
+  .steps h2{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:0 0 4px}
+  .steps .sub{color:var(--mute);font-size:.9rem;margin:0 0 16px}
+  ol{list-style:none;margin:0;padding:0;display:grid;gap:9px;counter-reset:s}
+  .step{width:100%;text-align:left;background:var(--void);border:1px solid var(--line);color:var(--bone);
+    border-radius:11px;padding:13px 14px 13px 46px;font:inherit;cursor:pointer;position:relative;transition:border-color .2s,background .2s,transform .08s}
+  .step::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
+    font:600 11px/1 ui-monospace,monospace;color:var(--dim)}
+  .step:hover{border-color:var(--teal-soft)}
+  .step:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .step .lab{display:block;font-weight:600}
+  .step .fn{display:block;color:var(--mute);font-size:.86rem;margin-top:2px}
+  .step[data-done="1"]{border-color:var(--teal-soft);background:rgba(32,211,192,.06);cursor:default}
+  .step[data-done="1"]::before{content:"\2713";background:var(--teal);color:var(--void);border-color:var(--teal)}
+  .step.shake{animation:shake .34s}
+  @keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+  @media(prefers-reduced-motion:reduce){.step.shake{animation:none}}
+  .bar{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .prog{flex:1;min-width:120px;height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+  .prog i{display:block;height:100%;width:0;background:var(--teal);transition:width .4s ease}
+  .pnum{font-family:ui-monospace,monospace;font-size:12px;color:var(--mute)}
+  .pnum b{color:var(--teal)}
+  .reset{font:600 13px/1 inherit;background:transparent;color:var(--bone);border:1px solid var(--line);border-radius:9px;padding:10px 15px;cursor:pointer}
+  .reset:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .fb{margin:14px 0 0;min-height:1.4em;font-size:.95rem;color:var(--mute)}
+  .fb[data-t="ok"]{color:var(--teal)}
+  .fb[data-t="no"]{color:var(--no)}
+  .fb b{color:inherit}
+  .live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<a class="skip" href="#steps">Skip to the steps</a>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <p class="eyebrow">Construction Arts · Procedural</p>
+      <h1>Pour a Footing, In the Right Order</h1>
+      <p class="lede">A footing forgives nothing. Perform the six steps in sequence. Get one out of order and the site tells you, before the concrete does.</p>
+    </div>
+    <button class="mute-btn" id="mute" type="button" aria-pressed="false">
+      <svg class="ic" id="muteic" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6v4h2.5L8 13V3L4.5 6H2z"/><path d="M10.5 5.5a3 3 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+      <span id="mutetx">Sound on</span>
+    </button>
+  </div>
+
+  <div class="grid">
+    <div class="scene">
+      <svg viewBox="0 0 400 240" role="img" aria-labelledby="scenetitle">
+        <title id="scenetitle">Cross-section of a footing trench that builds up as each step is completed</title>
+        <!-- ground -->
+        <rect x="0" y="96" width="140" height="144" fill="var(--soil)"/>
+        <rect x="260" y="96" width="140" height="144" fill="var(--soil)"/>
+        <!-- unexcavated plug -->
+        <rect id="plug" class="plug" x="140" y="96" width="120" height="144" fill="var(--soil2)"/>
+        <!-- trench floor (revealed on excavate) -->
+        <g id="l1" class="lyr"><rect x="140" y="196" width="120" height="44" fill="#221d17"/>
+          <line x1="140" y1="96" x2="140" y2="196" stroke="#000" stroke-opacity=".35" stroke-width="2"/>
+          <line x1="260" y1="96" x2="260" y2="196" stroke="#000" stroke-opacity=".35" stroke-width="2"/></g>
+        <!-- formwork -->
+        <g id="l2" class="lyr"><rect x="140" y="98" width="7" height="100" fill="var(--form)"/>
+          <rect x="253" y="98" width="7" height="100" fill="var(--form)"/></g>
+        <!-- rebar -->
+        <g id="l3" class="lyr" stroke="var(--steel)" stroke-width="2.4" stroke-linecap="round">
+          <line x1="152" y1="128" x2="248" y2="128"/><line x1="152" y1="152" x2="248" y2="152"/><line x1="152" y1="176" x2="248" y2="176"/>
+          <line x1="176" y1="120" x2="176" y2="188"/><line x1="224" y1="120" x2="224" y2="188"/></g>
+        <!-- concrete -->
+        <g id="l4" class="lyr"><rect x="147" y="112" width="106" height="84" fill="var(--concrete)"/></g>
+        <!-- screed / level top -->
+        <g id="l5" class="lyr"><rect x="147" y="110" width="106" height="5" fill="#9aa0a8"/>
+          <line x1="150" y1="112" x2="250" y2="112" stroke="#c9ced4" stroke-width="1.4"/></g>
+        <!-- cure cover -->
+        <g id="l6" class="lyr"><rect x="143" y="103" width="114" height="9" fill="none" stroke="var(--teal)" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <text x="200" y="86" text-anchor="middle" fill="var(--teal)" font-family="ui-monospace,monospace" font-size="10" letter-spacing="1">CURING</text></g>
+      </svg>
+      <p class="cap" id="scap">Untouched grade. Nothing poured yet.</p>
+    </div>
+
+    <div class="steps" id="steps">
+      <h2>The procedure</h2>
+      <p class="sub">Tap each step when it is time to perform it.</p>
+      <ol id="ol">
+        <li><button class="step" type="button" data-i="0"><span class="lab">Excavate the trench</span><span class="fn">Dig to bearing depth and level the floor.</span></button></li>
+        <li><button class="step" type="button" data-i="1"><span class="lab">Set the formwork</span><span class="fn">Line both sides so the pour holds its shape.</span></button></li>
+        <li><button class="step" type="button" data-i="2"><span class="lab">Place the rebar</span><span class="fn">Tie the steel cage on chairs, off the soil.</span></button></li>
+        <li><button class="step" type="button" data-i="3"><span class="lab">Pour the concrete</span><span class="fn">Fill the forms in a continuous placement.</span></button></li>
+        <li><button class="step" type="button" data-i="4"><span class="lab">Screed it level</span><span class="fn">Strike off the top flat to the form line.</span></button></li>
+        <li><button class="step" type="button" data-i="5"><span class="lab">Cover to cure</span><span class="fn">Keep it damp so it gains strength slowly.</span></button></li>
+      </ol>
+      <div class="bar">
+        <span class="prog" aria-hidden="true"><i id="pi"></i></span>
+        <span class="pnum"><b id="pn">0</b> / 6</span>
+        <button class="reset" id="reset" type="button">Start over</button>
+      </div>
+      <p class="fb" id="fb" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+  <p class="live" id="live" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var STEPS=[
+    {lab:"Excavated",           layer:"l1", cap:"Trench cut to depth. The floor is level and clean.", plug:true},
+    {lab:"Formwork set",        layer:"l2", cap:"Forms line both walls. The shape is held."},
+    {lab:"Rebar placed",        layer:"l3", cap:"Steel cage tied and lifted off the soil on chairs."},
+    {lab:"Concrete poured",     layer:"l4", cap:"Forms filled in one continuous placement."},
+    {lab:"Screeded level",      layer:"l5", cap:"Top struck off flat to the form line."},
+    {lab:"Curing",              layer:"l6", cap:"Covered and kept damp. Seven days to design strength."}
+  ];
+  var next=0, done=0;
+  var ol=document.getElementById('ol');
+  var fb=document.getElementById('fb');
+  var live=document.getElementById('live');
+  var pn=document.getElementById('pn'), pi=document.getElementById('pi');
+  var scap=document.getElementById('scap');
+  var plug=document.getElementById('plug');
+
+  // ---- self-contained audio, no files ----
+  var muted=false, actx=null;
+  function ac(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+  function tone(freqs,dur,type){
+    if(muted) return; var c=ac(); if(!c) return;
+    if(c.state==='suspended') c.resume();
+    var t0=c.currentTime;
+    freqs.forEach(function(f,i){
+      var o=c.createOscillator(), g=c.createGain();
+      o.type=type||'sine'; o.frequency.value=f;
+      var s=t0+i*0.09;
+      g.gain.setValueAtTime(0.0001,s);
+      g.gain.exponentialRampToValueAtTime(0.14,s+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001,s+dur);
+      o.connect(g).connect(c.destination); o.start(s); o.stop(s+dur+0.02);
+    });
+  }
+  var okTone=function(){ tone([660,880],0.16,'sine'); };
+  var errTone=function(){ tone([150],0.22,'square'); };
+  var doneTone=function(){ tone([523,659,784,1046],0.22,'sine'); };
+
+  var muteBtn=document.getElementById('mute'), muteTx=document.getElementById('mutetx'), muteIc=document.getElementById('muteic');
+  muteBtn.addEventListener('click',function(){
+    muted=!muted; muteBtn.setAttribute('aria-pressed',muted?'true':'false');
+    muteTx.textContent=muted?'Sound off':'Sound on';
+    muteIc.style.opacity=muted?'.5':'1';
+    if(!muted){ ac(); okTone(); }
+  });
+
+  function setProg(){ pn.textContent=done; pi.style.width=(done/STEPS.length*100)+'%'; }
+
+  ol.addEventListener('click',function(e){
+    var b=e.target.closest('.step'); if(!b) return;
+    var i=+b.dataset.i;
+    if(b.dataset.done==='1') return;
+    if(i!==next){
+      errTone();
+      b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+      var nextLab=document.querySelector('.step[data-i="'+next+'"] .lab').textContent.toLowerCase();
+      fb.dataset.t='no';
+      fb.innerHTML='<b>Out of order.</b> The next step is <b>'+nextLab+'</b>. You cannot '+b.querySelector('.lab').textContent.toLowerCase()+' before that.';
+      live.textContent='Out of order. Do '+nextLab+' next.';
+      return;
+    }
+    // correct
+    okTone();
+    b.dataset.done='1';
+    var st=STEPS[i];
+    if(st.plug) plug.classList.add('off');
+    var g=document.getElementById(st.layer); if(g) g.classList.add('on');
+    scap.textContent=st.cap;
+    done++; next++; setProg();
+    fb.dataset.t='ok';
+    if(next<STEPS.length){
+      fb.innerHTML='<b>'+st.lab+'.</b> Next: '+document.querySelector('.step[data-i="'+next+'"] .lab').textContent.toLowerCase()+'.';
+      live.textContent=st.lab+'. Next step: '+document.querySelector('.step[data-i="'+next+'"] .lab').textContent+'.';
+    } else {
+      doneTone();
+      fb.innerHTML='<b>Footing complete.</b> Poured in sequence, cured on schedule. This one holds.';
+      live.textContent='All six steps complete in the correct order. The footing is done.';
+    }
+  });
+
+  document.getElementById('reset').addEventListener('click',function(){
+    next=0; done=0; setProg();
+    [].forEach.call(ol.querySelectorAll('.step'),function(b){ b.removeAttribute('data-done'); });
+    [].forEach.call(document.querySelectorAll('.lyr'),function(g){ g.classList.remove('on'); });
+    plug.classList.remove('off');
+    scap.textContent='Untouched grade. Nothing poured yet.';
+    fb.removeAttribute('data-t'); fb.textContent='';
+    live.textContent='Reset. Six steps to perform, starting with excavation.';
+  });
+
+  setProg();
+})();
+</script>
+</body>
+</html>

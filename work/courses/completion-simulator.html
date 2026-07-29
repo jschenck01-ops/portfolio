@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Completion Simulator</title>
+<meta name="description" content="An accessible parametric simulation: change the design of a course and watch a cohort of 500 students move through it. Keyboard and screen-reader operable.">
+<style>
+  :root{
+    --void:#0A0A0C; --deep:#12121A; --card:#171722; --line:rgba(255,255,255,.12);
+    --bone:#EFEDE6; --dim:#9A98A2; --mute:#C4C2CC; --teal:#20D3C0; --teal-soft:rgba(32,211,192,.5);
+    --warm:#E8A54B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void);color:var(--bone);
+    font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;padding:clamp(20px,4vw,44px)}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--teal);color:var(--void);padding:8px 14px;border-radius:8px;z-index:9}
+  .wrap{max-width:940px;margin:0 auto}
+  .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin:0 0 10px}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.08;margin:0 0 12px;letter-spacing:-.01em}
+  .lede{color:var(--mute);max-width:64ch;margin:0 0 26px}
+  .sim{display:grid;grid-template-columns:300px 1fr;gap:clamp(16px,3vw,30px);align-items:start}
+  @media(max-width:720px){.sim{grid-template-columns:1fr}}
+  .controls{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,2.5vw,22px)}
+  .controls h2,.viz h2{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:0 0 16px}
+  .ctl{margin:0 0 20px}
+  .ctl:last-of-type{margin-bottom:8px}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem;color:var(--bone);margin:0 0 8px;gap:10px}
+  .ctl .val{font-family:ui-monospace,monospace;font-size:.85rem;color:var(--teal)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.14);outline:none;margin:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--teal);cursor:pointer;border:3px solid var(--void);box-shadow:0 0 0 1px var(--teal)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer;border:3px solid var(--void)}
+  input[type=range]:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
+  .ctl .hint{font-size:.78rem;color:var(--dim);margin:6px 0 0}
+  .reset{font:600 13px/1 inherit;background:transparent;color:var(--bone);border:1px solid var(--line);border-radius:9px;padding:11px 16px;cursor:pointer;width:100%;margin-top:8px;transition:border-color .2s}
+  .reset:hover{border-color:var(--teal-soft)}
+  .reset:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .viz{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3vw,26px)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 24px}
+  @media(max-width:460px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--void);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .k{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+  .stat .v{font-family:Georgia,serif;font-size:1.9rem;line-height:1;color:var(--bone)}
+  .stat .v b{color:var(--teal);font-weight:700}
+  .stat.hero .v b{color:var(--teal)}
+  .funnel{display:flex;flex-direction:column;gap:9px}
+  .lesson{display:grid;grid-template-columns:78px 1fr 52px;align-items:center;gap:10px}
+  .lesson .lab{font-family:ui-monospace,monospace;font-size:11px;color:var(--mute)}
+  .bartrack{height:20px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+  .barfill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-soft));border-radius:5px;transition:width .45s cubic-bezier(.4,0,.2,1)}
+  @media(prefers-reduced-motion:reduce){.barfill{transition:none}}
+  .lesson .pct{font-family:ui-monospace,monospace;font-size:11px;color:var(--teal);text-align:right}
+  .caption{color:var(--mute);font-size:.9rem;margin:20px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+  .caption b{color:var(--bone)}
+  .live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Skip to the simulator</a>
+<div class="wrap">
+  <p class="eyebrow">Learning Design · Simulation</p>
+  <h1>Course Completion Simulator</h1>
+  <p class="lede">Completion is not luck, it is design. Change how a course is built and watch a cohort of 500 enrolled students move through eight lessons. Every number updates live.</p>
+
+  <div class="sim" id="sim">
+    <div class="controls">
+      <h2>Course design</h2>
+      <div class="ctl">
+        <label for="len">Lesson length <span class="val" id="lenv">10 min</span></label>
+        <input type="range" id="len" min="3" max="24" step="1" value="10" aria-describedby="lenh">
+        <p class="hint" id="lenh">Shorter lessons lose fewer people between clicks.</p>
+      </div>
+      <div class="ctl">
+        <label for="act">Activities per lesson <span class="val" id="actv">2</span></label>
+        <input type="range" id="act" min="0" max="5" step="1" value="2" aria-describedby="acth">
+        <p class="hint" id="acth">Doing beats watching. Interaction rebuilds attention.</p>
+      </div>
+      <div class="ctl">
+        <label for="sup">Cohort support <span class="val" id="supv">Light</span></label>
+        <input type="range" id="sup" min="0" max="2" step="1" value="1" aria-describedby="suph">
+        <p class="hint" id="suph">None, light nudges, or an active cohort with a human in the loop.</p>
+      </div>
+      <div class="ctl">
+        <label for="reach">Marketing reach <span class="val" id="reachv">3 / wk</span></label>
+        <input type="range" id="reach" min="0" max="8" step="1" value="3" aria-describedby="reachh">
+        <p class="hint" id="reachh">Short-form pieces per week. Fills the top of the funnel.</p>
+      </div>
+      <button class="reset" id="reset" type="button">Reset to defaults</button>
+    </div>
+
+    <div class="viz">
+      <h2>Cohort outcome</h2>
+      <div class="stats">
+        <div class="stat"><p class="k">Enrolled / mo</p><p class="v"><b id="enroll">500</b></p></div>
+        <div class="stat hero"><p class="k">Completion rate</p><p class="v"><b id="rate">0</b>%</p></div>
+        <div class="stat"><p class="k">Graduates / mo</p><p class="v"><b id="grad">0</b></p></div>
+      </div>
+      <div class="funnel" id="funnel" aria-hidden="true"></div>
+      <p class="caption" id="caption"></p>
+    </div>
+  </div>
+  <p class="live" id="live" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var DEF={len:10,act:2,sup:1,reach:3};
+  var SUPLABEL=['None','Light','Active'];
+  var els={
+    len:document.getElementById('len'), act:document.getElementById('act'),
+    sup:document.getElementById('sup'), reach:document.getElementById('reach')
+  };
+  var out={
+    lenv:document.getElementById('lenv'), actv:document.getElementById('actv'),
+    supv:document.getElementById('supv'), reachv:document.getElementById('reachv'),
+    enroll:document.getElementById('enroll'), rate:document.getElementById('rate'),
+    grad:document.getElementById('grad'), funnel:document.getElementById('funnel'),
+    caption:document.getElementById('caption'), live:document.getElementById('live')
+  };
+  var LESSONS=8;
+  function clamp(x,lo,hi){ return Math.max(lo,Math.min(hi,x)); }
+
+  function model(v){
+    // per-lesson retention, built from the design choices
+    var lenPenalty=(v.len-8)*0.006;              // longer lessons shed more
+    var actBoost=v.act*0.016;                     // each activity holds people
+    var supBoost=[0,0.022,0.045][v.sup];          // human support holds people
+    var p=clamp(0.90 - lenPenalty + actBoost + supBoost, 0.74, 0.986);
+    // retention curve across lessons
+    var curve=[], r=1;
+    for(var i=0;i<LESSONS;i++){ r=r*p; curve.push(r); }
+    var completion=curve[LESSONS-1];
+    var enroll=Math.round(220*(1+v.reach*0.22));  // reach fills the top
+    var grad=Math.round(enroll*completion);
+    return {p:p,curve:curve,completion:completion,enroll:enroll,grad:grad};
+  }
+
+  function drawFunnel(curve){
+    var html='';
+    for(var i=0;i<curve.length;i++){
+      var pct=Math.round(curve[i]*100);
+      html+='<div class="lesson"><span class="lab">Lesson '+(i+1)+'</span>'
+          +'<div class="bartrack"><div class="barfill" style="width:'+pct+'%"></div></div>'
+          +'<span class="pct">'+pct+'%</span></div>';
+    }
+    out.funnel.innerHTML=html;
+  }
+
+  var liveT=null;
+  function announce(m,grad,enroll){
+    clearTimeout(liveT);
+    liveT=setTimeout(function(){
+      out.live.textContent=Math.round(m.completion*100)+' percent completion. '
+        +m.grad+' of '+m.enroll+' students graduate.';
+    },350);
+  }
+
+  function render(){
+    var v={len:+els.len.value, act:+els.act.value, sup:+els.sup.value, reach:+els.reach.value};
+    out.lenv.textContent=v.len+' min';
+    out.actv.textContent=v.act;
+    out.supv.textContent=SUPLABEL[v.sup];
+    out.reachv.textContent=v.reach+' / wk';
+    var m=model(v);
+    out.enroll.textContent=m.enroll;
+    out.rate.textContent=Math.round(m.completion*100);
+    out.grad.textContent=m.grad;
+    drawFunnel(m.curve);
+    var c;
+    if(m.completion>=0.6) c='<b>This course finishes.</b> Short lessons, real interaction, and support keep the cohort intact to the end.';
+    else if(m.completion>=0.35) c='<b>Middle of the pack.</b> You are keeping a third of the room. Add an activity or trim length to climb.';
+    else c='<b>The industry average.</b> Most of the cohort quietly disappears. This is the problem the design is built to beat.';
+    out.caption.innerHTML=c;
+    announce(m);
+  }
+
+  Object.keys(els).forEach(function(k){ els[k].addEventListener('input',render); });
+  document.getElementById('reset').addEventListener('click',function(){
+    Object.keys(DEF).forEach(function(k){ els[k].value=DEF[k]; });
+    render(); out.live.textContent='Simulator reset to defaults.';
+  });
+  render();
+})();
+</script>
+</body>
+</html>
