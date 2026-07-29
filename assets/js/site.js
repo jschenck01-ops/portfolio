@@ -99,11 +99,11 @@
         var el = e.target, target = +el.dataset.count;
         var pre = el.dataset.pre||'', post = el.dataset.post||'';
         io.unobserve(el);
-        if (REDUCED){ el.textContent = pre+target+post; return; }
+        if (REDUCED){ el.textContent = pre+target.toLocaleString()+post; return; }
         var t0 = performance.now(), dur = 1400;
         (function step(now){
           var p = Math.min((now-t0)/dur,1);
-          el.textContent = pre + Math.round(target*(1-Math.pow(1-p,3))) + post;
+          el.textContent = pre + Math.round(target*(1-Math.pow(1-p,3))).toLocaleString() + post;
           if(p<1) requestAnimationFrame(step);
         })(t0);
       });
